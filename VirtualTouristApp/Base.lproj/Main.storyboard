@@ -20,6 +20,9 @@
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="oCC-Xy-ZNA">
                                 <rect key="frame" x="0.0" y="64" width="600" height="536"/>
+                                <connections>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="mnr-bW-sra"/>
+                                </connections>
                             </mapView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
@@ -31,9 +34,14 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="qbY-KK-dVU">
-                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="895-Ye-tzL"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="895-Ye-tzL">
+                            <connections>
+                                <action selector="editButton:" destination="BYZ-38-t0r" id="bvV-Fz-3Xc"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="mapView" destination="oCC-Xy-ZNA" id="Keq-Sf-ye8"/>
                         <segue destination="lym-5n-VC7" kind="presentation" identifier="showPhotoAlbumVC" id="Iao-Kk-Bgv"/>
                     </connections>
                 </viewController>
@@ -61,6 +69,9 @@
                             </navigationBar>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="7K2-Uo-FXG">
                                 <rect key="frame" x="0.0" y="64" width="600" height="133"/>
+                                <connections>
+                                    <outlet property="delegate" destination="lym-5n-VC7" id="jG2-jH-25X"/>
+                                </connections>
                             </mapView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="uob-ap-AK5">
                                 <rect key="frame" x="0.0" y="196" width="600" height="360"/>
@@ -84,12 +95,20 @@
                                         </view>
                                     </collectionViewCell>
                                 </cells>
+                                <connections>
+                                    <outlet property="dataSource" destination="lym-5n-VC7" id="8XC-bh-zLM"/>
+                                    <outlet property="delegate" destination="lym-5n-VC7" id="7qP-n0-A1c"/>
+                                </connections>
                             </collectionView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SBQ-eb-EcB">
                                 <rect key="frame" x="0.0" y="556" width="600" height="44"/>
                                 <items>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="bH2-sY-0Wc"/>
-                                    <barButtonItem title="New Collection" id="HvV-Zy-rWL"/>
+                                    <barButtonItem title="New Collection" id="HvV-Zy-rWL">
+                                        <connections>
+                                            <action selector="newCollectionButton:" destination="lym-5n-VC7" id="2Wf-R6-cXE"/>
+                                        </connections>
+                                    </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="67D-HO-Km0"/>
                                 </items>
                             </toolbar>
@@ -111,6 +130,10 @@
                             <constraint firstItem="uet-BL-Pon" firstAttribute="top" secondItem="MGe-PP-IaG" secondAttribute="bottom" id="zFs-ak-Lym"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="mapView" destination="7K2-Uo-FXG" id="eWL-Kg-qc9"/>
+                        <outlet property="photoAlbumCV" destination="uob-ap-AK5" id="9vz-93-es4"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tR0-h2-J1T" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

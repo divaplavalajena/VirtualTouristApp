@@ -19,10 +19,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     
     
     @IBOutlet var mapView: MKMapView!
+
     
     @IBAction func editButton(sender: AnyObject) {
-        //TODO: complete edit button code on first page
     }
+
     
     func handleLongPress(getstureRecognizer : UIGestureRecognizer){
         if getstureRecognizer.state != .Began { return }

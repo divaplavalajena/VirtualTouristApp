@@ -16,11 +16,11 @@ class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
     var latitudeP: Double?
     var longitudeP: Double?
     
-    
     @IBOutlet var mapView: MKMapView!
-    
+
     @IBOutlet var photoAlbumCV: UICollectionView!
     
+
     @IBAction func newCollectionButton(sender: AnyObject) {
     }
     
