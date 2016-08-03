@@ -9,7 +9,7 @@
 import UIKit
 import MapKit
 
-class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
+class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, MKMapViewDelegate {
     
     //Properties:
     var photos: [AnyObject]!
@@ -17,8 +17,10 @@ class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
     //var longitudeP: Double?
     
     @IBOutlet var mapView: MKMapView!
+    
+    
+    @IBOutlet var photoAlbumVC: UICollectionView!
 
-    @IBOutlet var photoAlbumCV: UICollectionView!
     
     @IBOutlet var flowLayout: UICollectionViewFlowLayout!
     
@@ -26,9 +28,6 @@ class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
     @IBAction func newCollectionButton(sender: AnyObject) {
     }
     
-    override func viewWillAppear(animated: Bool) {
-        collectionView?.reloadData()
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +37,8 @@ class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
         
         //implement cell flowLayout
         cellFlowLayout(self.view.frame.size)
+        
+        photos = [AnyObject]()
 
     }
     
@@ -54,14 +55,14 @@ class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
     
     //MARK: Collection View Methods
     
-    override func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 1
         //return fetchedResultsController.sections?.count ?? 0
     }
     
     
-    override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
         return photos.count
         
@@ -73,7 +74,7 @@ class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
          */
     }
     
-    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) /*as! PhotoCell*/
         
         cell.backgroundColor = UIColor.blackColor()

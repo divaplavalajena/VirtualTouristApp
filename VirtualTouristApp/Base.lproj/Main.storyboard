@@ -42,7 +42,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="mapView" destination="oCC-Xy-ZNA" id="Keq-Sf-ye8"/>
-                        <segue destination="9dy-ug-fzn" kind="presentation" identifier="showPhotoAlbumVC" id="Iao-Kk-Bgv"/>
+                        <segue destination="lym-5n-VC7" kind="show" identifier="showPhotoAlbumVC" id="vpe-eO-o7B"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -145,12 +145,12 @@
                     <connections>
                         <outlet property="flowLayout" destination="wIw-5O-6UK" id="PV9-cN-rVW"/>
                         <outlet property="mapView" destination="7K2-Uo-FXG" id="eWL-Kg-qc9"/>
-                        <outlet property="photoAlbumCV" destination="uob-ap-AK5" id="9vz-93-es4"/>
+                        <outlet property="photoAlbumVC" destination="uob-ap-AK5" id="Bdh-X8-JML"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tR0-h2-J1T" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2650" y="429"/>
+            <point key="canvasLocation" x="1868" y="429"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="E0E-h4-kNf">
@@ -169,24 +169,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="a45-Ik-WFc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="392" y="429"/>
-        </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="bWf-Ek-pfu">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="9dy-ug-fzn" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="sY2-hQ-Xtw">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="lym-5n-VC7" kind="relationship" relationship="rootViewController" id="Edb-tB-G8C"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="1jt-qH-wlx" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1838" y="429"/>
         </scene>
     </scenes>
 </document>

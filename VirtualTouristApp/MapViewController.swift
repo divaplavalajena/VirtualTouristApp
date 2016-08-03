@@ -9,22 +9,41 @@
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate, CLLocationManagerDelegate {
     
-    //Properties:
-    //var longitude: Double = 0.0
-    //var latitude: Double = 0.0
-    
+    //MARK: Properties
     var annotations = [MKPointAnnotation]()
-    
+    let locationManager = CLLocationManager()
     
     @IBOutlet var mapView: MKMapView!
-
     
     @IBAction func editButton(sender: AnyObject) {
+        //TODO: Create edit ability once Core Data is set up - will delete pins and connected photos from Core Data
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        
+        mapView.delegate = self
+        
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
+        mapView.showsUserLocation = true
+        
+        let uilpgr = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
+        uilpgr.minimumPressDuration = 1.0
+        mapView.addGestureRecognizer(uilpgr)
+        
+    }
     
+    override func viewWillAppear(animated: Bool) {
+        //TODO: create method that will use pins already in core data to populate map OR do this in viewDidLoad?????
+    }
+    
+    // gesture recognizer to accept long press to place a pin on the map
     func handleLongPress(getstureRecognizer : UIGestureRecognizer){
         if getstureRecognizer.state != .Began { return }
         
@@ -34,29 +53,47 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         let annotation = MKPointAnnotation()
         annotation.coordinate = touchMapCoordinate
         
-        //TODO: set annotation title on pin creation here
-        
+        //set annotation latitude, longitude, and title on pin creation here
         FlickrClient.sharedInstance().latitude = annotation.coordinate.latitude
         FlickrClient.sharedInstance().longitude = annotation.coordinate.longitude
         FlickrClient.sharedInstance().annotationTitle = annotation.title
         
-        //latitude = annotation.coordinate.latitude
-        //longitude = annotation.coordinate.longitude
-        
         mapView.addAnnotation(annotation)
     }
     
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
+    {
+        let location = locations.last
+        let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
+        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1))
+        mapView.setRegion(region, animated: true)
+        locationManager.stopUpdatingLocation()
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = center
+        centerMapOnLocation(annotation, regionRadius: 1000.0)
+        
+        //set annotation latitude, longitude, and title on pin creation here
+        FlickrClient.sharedInstance().latitude = annotation.coordinate.latitude
+        FlickrClient.sharedInstance().longitude = annotation.coordinate.longitude
+        FlickrClient.sharedInstance().annotationTitle = annotation.title
+        print("The tapped pin has a latitude of \(FlickrClient.sharedInstance().latitude!) and a longitude of \(FlickrClient.sharedInstance().longitude!)")
+    }
+    
+    func locationManager(manager: CLLocationManager, didFailWithError error: NSError)
+    {
+        print("Errors: " + error.localizedDescription)
+    }
+    
+    //For use with test pin data func addMapLocations
     func centerMapOnLocation(location: MKPointAnnotation, regionRadius: Double) {
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(location.coordinate,
                                                                   regionRadius * 2.0, regionRadius * 2.0)
         mapView.setRegion(coordinateRegion, animated: true)
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        mapView.delegate = self
+    
+    //Test data to see if map is working
+    func addMapLocations() {
         
         //Hard coded locations for testing on mapView
         let locations = [
@@ -85,21 +122,17 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         
         mapView.addAnnotations(annotations)
         
-        let uilpgr = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
-        uilpgr.minimumPressDuration = 1.0
-        mapView.addGestureRecognizer(uilpgr)
-        
         centerMapOnLocation(annotations[0], regionRadius: 1000.0)
+
     }
     
-    override func viewWillAppear(animated: Bool) {
-        //TODO: create method that will use pins already in core data to populate map
-    }
+    
+
     
     // MARK: - MKMapViewDelegate
     
-    // Here we create a view with a "right callout accessory view". You might choose to look into other
-    // decoration alternatives.
+    
+    // "Right callout accessory view" created to NOT show - tap will be detected on the pin itself
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         
         let reuseId = "pin"
@@ -110,8 +143,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = false
             pinView!.pinTintColor = UIColor.redColor()
-            //pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
-            print("The tapped pin has a latitude of \(FlickrClient.sharedInstance().latitude) and a longitude of \(FlickrClient.sharedInstance().longitude)")
         }
         else {
             pinView!.annotation = annotation
@@ -121,53 +152,17 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     }
     
     
-    // This delegate method is implemented to respond to taps. It opens the system browser
-    // to the URL specified in the annotationViews subtitle property.
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        
-        print("The tapped pin has a latitude of \(FlickrClient.sharedInstance().latitude) and a longitude of \(FlickrClient.sharedInstance().longitude)")
-        /*
-        if control == view.rightCalloutAccessoryView {
-            let app = UIApplication.sharedApplication()
-            if let toOpen = view.annotation?.subtitle! {
-                app.openURL(NSURL(string: toOpen)!)
-            }
-        }
-         */
-        
-    }
-    
+    // This method allows for a direct pin tap as opposed to a "right callout accessory view"
+    // The segue to the PhotoAlbumVC is performed from the direct pin tap
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         
-        /*
-         guard let annotation = view.annotation else { /* no annotation */ return }
-         let latitude = annotation.coordinate.latitude
-         let longitude = annotation.coordinate.longitude
-         let title = annotation.title
-         */
-        
-        /*
-         let storyboard = UIStoryboard (name: "Main", bundle: nil)
-         let photoAlbumVC = storyboard.instantiateViewControllerWithIdentifier("PhotoAlbumViewController") as! PhotoAlbumViewController
-         photoAlbumVC.latitudeP = latitude
-         photoAlbumVC.longitudeP = longitude
-         presentViewController(photoAlbumVC, animated: true, completion: nil)
-         */
+        print("The tapped pin has a latitude of \(FlickrClient.sharedInstance().latitude!) and a longitude of \(FlickrClient.sharedInstance().longitude!)")
         
         performSegueWithIdentifier("showPhotoAlbumVC", sender: self)
         
         mapView.deselectAnnotation(view.annotation, animated: true)
         
         
-    }
-    
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == "showPhotoAlbumVC" {
-            //let controller = segue.destinationViewController as! PhotoAlbumViewController
-            //controller.latitudeP = FlickrClient.sharedInstance().latitudePin
-            //controller.longitudeP = FlickrClient.sharedInstance().longitudePin
-        }
     }
     
 }
