@@ -14,12 +14,13 @@ class FlickrClient : NSObject {
     
     // MARK: Properties
     //TODO: get these values from Core Data instead
-    var latitudePin:Double?
-    var longitudePin:Double?
+    var latitude:Double?
+    var longitude:Double?
+    var annotationTitle: String?
     
     private func bboxString() -> String {
         // ensure bbox is bounded by minimum and maximums
-        if let latitude = latitudePin, let longitude = longitudePin {
+        if let latitude = latitude, let longitude = longitude {
             let minimumLon = max(longitude - Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.0)
             let minimumLat = max(latitude - Constants.Flickr.SearchBBoxHalfHeight, Constants.Flickr.SearchLatRange.0)
             let maximumLon = min(longitude + Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.1)

@@ -13,29 +13,44 @@ class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
     
     //Properties:
     var photos: [AnyObject]!
-    var latitudeP: Double?
-    var longitudeP: Double?
+    //var latitudeP: Double?
+    //var longitudeP: Double?
     
     @IBOutlet var mapView: MKMapView!
 
     @IBOutlet var photoAlbumCV: UICollectionView!
     
+    @IBOutlet var flowLayout: UICollectionViewFlowLayout!
+    
 
     @IBAction func newCollectionButton(sender: AnyObject) {
     }
     
+    override func viewWillAppear(animated: Bool) {
+        collectionView?.reloadData()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         // Do any additional setup after loading the view.
+        
+        mapView.delegate = self
+        
+        //implement cell flowLayout
+        cellFlowLayout(self.view.frame.size)
+
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    func cellFlowLayout(size: CGSize) {
+        print("cellFlowLayout called")
+        let space: CGFloat = 1.5
+        let dimension: CGFloat = size.width >= size.height ? (size.width - (5 * space)) / 6.0 : (size.width - (2 * space)) / 3.0
+        
+        flowLayout.minimumLineSpacing = space
+        flowLayout.minimumInteritemSpacing = space
+        flowLayout.itemSize = CGSizeMake(dimension, dimension)
+        
     }
-    
     
     //MARK: Collection View Methods
     
@@ -60,6 +75,8 @@ class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
     
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) /*as! PhotoCell*/
+        
+        cell.backgroundColor = UIColor.blackColor()
         
         //configureCell(cell, atIndexPath: indexPath)
         
@@ -181,3 +198,33 @@ class PhotoAlbumViewController: UICollectionViewController, MKMapViewDelegate {
      */
     
 }
+
+/*
+extension PhotoAlbumViewController: UICollectionViewDelegateFlowLayout {
+    
+    //1
+    func collectionView(collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                               sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        
+        let flickrPhoto =  photoForIndexPath(indexPath)
+        //2
+        if var size = flickrPhoto.thumbnail?.size {
+            size.width += 10
+            size.height += 10
+            return size
+        }
+        return CGSize(width: 100, height: 100)
+    }
+    
+    //3
+    func collectionView(collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                               insetForSectionAtIndex section: Int) -> UIEdgeInsets {
+        return sectionInsets
+    }
+    
+}
+*/
+
+

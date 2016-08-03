@@ -12,8 +12,8 @@ import MapKit
 class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
     
     //Properties:
-    var longitude: Double = 0.0
-    var latitude: Double = 0.0
+    //var longitude: Double = 0.0
+    //var latitude: Double = 0.0
     
     var annotations = [MKPointAnnotation]()
     
@@ -36,8 +36,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         
         //TODO: set annotation title on pin creation here
         
-        latitude = annotation.coordinate.latitude
-        longitude = annotation.coordinate.longitude
+        FlickrClient.sharedInstance().latitude = annotation.coordinate.latitude
+        FlickrClient.sharedInstance().longitude = annotation.coordinate.longitude
+        FlickrClient.sharedInstance().annotationTitle = annotation.title
+        
+        //latitude = annotation.coordinate.latitude
+        //longitude = annotation.coordinate.longitude
         
         mapView.addAnnotation(annotation)
     }
@@ -107,6 +111,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             pinView!.canShowCallout = false
             pinView!.pinTintColor = UIColor.redColor()
             //pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
+            print("The tapped pin has a latitude of \(FlickrClient.sharedInstance().latitude) and a longitude of \(FlickrClient.sharedInstance().longitude)")
         }
         else {
             pinView!.annotation = annotation
@@ -119,13 +124,17 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     // This delegate method is implemented to respond to taps. It opens the system browser
     // to the URL specified in the annotationViews subtitle property.
     func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        
+        print("The tapped pin has a latitude of \(FlickrClient.sharedInstance().latitude) and a longitude of \(FlickrClient.sharedInstance().longitude)")
+        /*
         if control == view.rightCalloutAccessoryView {
             let app = UIApplication.sharedApplication()
             if let toOpen = view.annotation?.subtitle! {
                 app.openURL(NSURL(string: toOpen)!)
-                print("The tapped pin has a latitude of \(latitude) and a longitude of \(longitude)")
             }
         }
+         */
+        
     }
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
@@ -155,9 +164,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "showPhotoAlbumVC" {
-            let controller = segue.destinationViewController as! PhotoAlbumViewController
-            controller.latitudeP = latitude
-            controller.longitudeP = longitude
+            //let controller = segue.destinationViewController as! PhotoAlbumViewController
+            //controller.latitudeP = FlickrClient.sharedInstance().latitudePin
+            //controller.longitudeP = FlickrClient.sharedInstance().longitudePin
         }
     }
     
