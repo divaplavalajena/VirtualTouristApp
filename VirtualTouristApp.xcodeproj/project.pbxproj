@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9CA09FE71D529C7B006C9A76 /* PhotoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA09FE61D529C7B006C9A76 /* PhotoCollectionViewCell.swift */; };
 		9CBDC8EA1D4BF6690030A42D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBDC8E91D4BF6690030A42D /* AppDelegate.swift */; };
 		9CBDC8EC1D4BF6690030A42D /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBDC8EB1D4BF6690030A42D /* MapViewController.swift */; };
 		9CBDC8EF1D4BF6690030A42D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9CBDC8ED1D4BF6690030A42D /* Main.storyboard */; };
@@ -41,6 +42,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9CA09FE61D529C7B006C9A76 /* PhotoCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCollectionViewCell.swift; sourceTree = "<group>"; };
 		9CBDC8E61D4BF6690030A42D /* VirtualTouristApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTouristApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9CBDC8E91D4BF6690030A42D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9CBDC8EB1D4BF6690030A42D /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
@@ -88,6 +90,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9CA09FE81D529C85006C9A76 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				9CA09FE61D529C7B006C9A76 /* PhotoCollectionViewCell.swift */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
 		9CBDC8DD1D4BF6690030A42D = {
 			isa = PBXGroup;
 			children = (
@@ -114,6 +124,7 @@
 				9CBDC8E91D4BF6690030A42D /* AppDelegate.swift */,
 				9CBDC9201D4BF8820030A42D /* GCDBlackBox.swift */,
 				9CBDC91F1D4BF83E0030A42D /* Model */,
+				9CA09FE81D529C85006C9A76 /* View */,
 				9CBDC9191D4BF79B0030A42D /* Controller */,
 				9CBDC91A1D4BF7B00030A42D /* Assets */,
 			);
@@ -302,6 +313,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9CBDC9251D4C04B40030A42D /* Photo.swift in Sources */,
+				9CA09FE71D529C7B006C9A76 /* PhotoCollectionViewCell.swift in Sources */,
 				9CBDC9231D4C00B50030A42D /* Pin.swift in Sources */,
 				9CBDC9271D4C07460030A42D /* PinsManager.swift in Sources */,
 				9CBDC91E1D4BF8250030A42D /* Constants.swift in Sources */,
@@ -534,6 +546,7 @@
 				9CBDC9101D4BF6690030A42D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		9CBDC9111D4BF6690030A42D /* Build configuration list for PBXNativeTarget "VirtualTouristAppTests" */ = {
 			isa = XCConfigurationList;
@@ -542,6 +555,7 @@
 				9CBDC9131D4BF6690030A42D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		9CBDC9141D4BF6690030A42D /* Build configuration list for PBXNativeTarget "VirtualTouristAppUITests" */ = {
 			isa = XCConfigurationList;
@@ -550,6 +564,7 @@
 				9CBDC9161D4BF6690030A42D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

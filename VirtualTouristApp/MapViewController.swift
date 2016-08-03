@@ -84,7 +84,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         print("Errors: " + error.localizedDescription)
     }
     
-    //For use with test pin data func addMapLocations
+    //Centers the map on a coordinate (with lat and lon) with requisite radius
     func centerMapOnLocation(location: MKPointAnnotation, regionRadius: Double) {
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(location.coordinate,
                                                                   regionRadius * 2.0, regionRadius * 2.0)

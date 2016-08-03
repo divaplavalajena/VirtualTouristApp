@@ -13,18 +13,14 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     //Properties:
     var photos: [AnyObject]!
-    //var latitudeP: Double?
-    //var longitudeP: Double?
+    let annotation = MKPointAnnotation()
     
     @IBOutlet var mapView: MKMapView!
     
-    
     @IBOutlet var photoAlbumVC: UICollectionView!
-
     
     @IBOutlet var flowLayout: UICollectionViewFlowLayout!
     
-
     @IBAction func newCollectionButton(sender: AnyObject) {
     }
     
@@ -33,10 +29,17 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+        annotation.coordinate.latitude = FlickrClient.sharedInstance().latitude!
+        annotation.coordinate.longitude = FlickrClient.sharedInstance().longitude!
+        annotation.title = FlickrClient.sharedInstance().annotationTitle
+        centerMapOnLocation(annotation, regionRadius: 500.0)
+    
         mapView.delegate = self
+        mapView.addAnnotation(annotation)
         
         //implement cell flowLayout
-        cellFlowLayout(self.view.frame.size)
+        //cellFlowLayout(self.view.frame.size)
+        cellFlowLayout(photoAlbumVC.frame.size)
         
         photos = [AnyObject]()
 
@@ -75,15 +78,19 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) /*as! PhotoCell*/
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
         
-        cell.backgroundColor = UIColor.blackColor()
+        cell.backgroundColor = UIColor.redColor()
+        
+        let photo = photos[indexPath.item]
+        
+        cell.imageView?.image = photo as? UIImage
         
         //configureCell(cell, atIndexPath: indexPath)
         
         return cell
         
-        //let photo = photos[indexPath.item]
+        
         //cell.setText(meme.topText, bottomString: meme.bottomText)
         
         /////cell.sentMemeImageView?.image = meme.imageMeme
@@ -166,8 +173,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     // MARK: - MKMapViewDelegate
     
-    // Here we create a view with a "right callout accessory view". You might choose to look into other
-    // decoration alternatives.
+    // "Right callout accessory view" created to NOT show, just the pin selected from previous view
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         
         let reuseId = "pin"
@@ -176,9 +182,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
-            pinView!.canShowCallout = false
+            pinView!.canShowCallout = true
             pinView!.pinTintColor = UIColor.redColor()
-            //pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
+            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
         }
         else {
             pinView!.annotation = annotation
@@ -187,6 +193,12 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         return pinView
     }
     
+    //Centers the map on a coordinate (with lat and lon) with requisite radius
+    func centerMapOnLocation(location: MKPointAnnotation, regionRadius: Double) {
+        let coordinateRegion = MKCoordinateRegionMakeWithDistance(location.coordinate,
+                                                                  regionRadius * 2.0, regionRadius * 2.0)
+        mapView.setRegion(coordinateRegion, animated: true)
+    }
     
     /*
      // MARK: - Navigation
