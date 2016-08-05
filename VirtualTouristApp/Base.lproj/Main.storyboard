@@ -79,21 +79,21 @@
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="uob-ap-AK5">
                                 <rect key="frame" x="0.0" y="196" width="600" height="360"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="wIw-5O-6UK">
-                                    <size key="itemSize" width="110" height="81"/>
+                                    <size key="itemSize" width="102" height="77"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCell" id="eWq-lE-aH0" customClass="PhotoCollectionViewCell" customModule="VirtualTouristApp" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="110" height="81"/>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFill" reuseIdentifier="PhotoCell" id="eWq-lE-aH0" customClass="PhotoCollectionViewCell" customModule="VirtualTouristApp" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="102" height="77"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="110" height="81"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="102" height="77"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xx0-Hu-D4W">
-                                                    <rect key="frame" x="0.0" y="8" width="110" height="73"/>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xx0-Hu-D4W">
+                                                    <rect key="frame" x="0.0" y="8" width="102" height="69"/>
                                                 </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
@@ -110,8 +110,8 @@
                                     </collectionViewCell>
                                 </cells>
                                 <connections>
-                                    <outlet property="dataSource" destination="lym-5n-VC7" id="8XC-bh-zLM"/>
-                                    <outlet property="delegate" destination="lym-5n-VC7" id="7qP-n0-A1c"/>
+                                    <outlet property="dataSource" destination="lym-5n-VC7" id="kri-9E-neI"/>
+                                    <outlet property="delegate" destination="lym-5n-VC7" id="mUA-8F-Zum"/>
                                 </connections>
                             </collectionView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SBQ-eb-EcB">

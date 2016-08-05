@@ -12,7 +12,9 @@ import MapKit
 class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, MKMapViewDelegate {
     
     //Properties:
-    var photos: [AnyObject]!
+    var selectedIndexes = [NSIndexPath]()
+    var photos: [Photo]!
+    var tempImages = [UIImage]()
     let annotation = MKPointAnnotation()
     
     @IBOutlet var mapView: MKMapView!
@@ -29,6 +31,10 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+                //photoAlbumVC.registerClass(PhotoCollectionViewCell.self, forCellWithReuseIdentifier: "PhotoCell")
+        
+                //loadTempImages()
+        
         annotation.coordinate.latitude = FlickrClient.sharedInstance().latitude!
         annotation.coordinate.longitude = FlickrClient.sharedInstance().longitude!
         annotation.title = FlickrClient.sharedInstance().annotationTitle
@@ -38,21 +44,60 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         mapView.addAnnotation(annotation)
         
         //implement cell flowLayout
-        //cellFlowLayout(self.view.frame.size)
         cellFlowLayout(photoAlbumVC.frame.size)
         
-        photos = [AnyObject]()
+        photos = [Photo]()
 
+    }
+    
+    func loadTempImages() {
+        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
+        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
+        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
+        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
+        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
+        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        FlickrClient.sharedInstance().getPagesFromFlickrBySearch { (randomPageNumber, error) in
+            if let randomPageNumber = randomPageNumber {
+                FlickrClient.sharedInstance().displayImagesFromFlickrBySearch(randomPageNumber, completionHandlerForFlickrImages: { (photos, error) in
+                    if let photos = photos {
+                        self.photos = photos
+                        
+                        print("Network calls to Flickr successful, here is the photos array.")
+                        print("This is how many photos are in the array: \(photos.count).")
+                        print(photos)
+                        performUIUpdatesOnMain{
+                            self.photoAlbumVC.reloadData()
+                        }
+                    }
+                })
+            }
+        }
     }
     
     func cellFlowLayout(size: CGSize) {
         print("cellFlowLayout called")
-        let space: CGFloat = 1.5
+        //Layout the collection view so that the cells take up 1/3 of the width with no space between
+        
+        let space: CGFloat = 0.0
         let dimension: CGFloat = size.width >= size.height ? (size.width - (5 * space)) / 6.0 : (size.width - (2 * space)) / 3.0
         
-        flowLayout.minimumLineSpacing = space
-        flowLayout.minimumInteritemSpacing = space
+        //flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        flowLayout.minimumLineSpacing = 0
+        flowLayout.minimumInteritemSpacing = 0
+        
+        //let width = floor(self.photoAlbumVC.frame.size.width/3)
+        //let screenWidth = self.photoAlbumVC.bounds.size.width
+        //let totalSpacing = flowLayout.minimumInteritemSpacing * 3.0
+        //let imageSize = (screenWidth - totalSpacing) / 3.0
         flowLayout.itemSize = CGSizeMake(dimension, dimension)
+        
+        photoAlbumVC.collectionViewLayout = flowLayout
         
     }
     
@@ -67,7 +112,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
-        return photos.count
+        return photos.count         //tempImages.count
         
         /*
          let sectionInfo = fetchedResultsController.sections![section]
@@ -78,88 +123,81 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
+        let cell = photoAlbumVC.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
         
-        cell.backgroundColor = UIColor.redColor()
+        //cell.imageView?.image = tempImages[indexPath.row]
         
-        let photo = photos[indexPath.item]
-        
-        cell.imageView?.image = photo as? UIImage
-        
-        //configureCell(cell, atIndexPath: indexPath)
+        configureCell(cell, atIndexPath: indexPath)
         
         return cell
         
-        
-        //cell.setText(meme.topText, bottomString: meme.bottomText)
-        
-        /////cell.sentMemeImageView?.image = meme.imageMeme
-        
-        //let imageView = UIImageView(image: meme.imageMeme)
         //cell.backgroundView = imageView
-        
-        
     }
     
+    
     // MARK: - Configure Cell
-    //TODO: Remove and/or change this code
-    //SOMEONE ELSE'S SOLUTION
-    /*
-     func configureCell(cell: PhotoCell, atIndexPath indexPath: NSIndexPath) {
+    
+     func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
      
-     var photoImage = UIImage()
-     
-     cell.imageView.image = nil
-     
-     let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-     
-     // Set the Movie Poster Image
-     
-     if photo.imagePath == nil || photo.imagePath == "" {
-     photoImage = UIImage(named: "VirtualTourist")!
-     } else if photo.image != nil {
-     photoImage = photo.image!
-     } else { // This is the interesting case. The photo has an image name, but it is not downloaded yet.
-     
-     // Start the task that will eventually download the image
-     let task = Flickr.sharedInstance().getFlickrImage(photo.imagePath!) { imageData, error in
-     
-     if let error = error {
-     print("Image download error: \(error.localizedDescription)")
+         var photoImage = UIImage()
+         
+         cell.imageView.image = nil
+         
+         let photo = photos[indexPath.item]
+            //self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+         
+         // Set the Flickr Image
+         if photo.imagePath == nil || photo.imagePath == "" {
+             photoImage = UIImage(named: "VirtualTourist_76")!
+         } /*else if photo.image != nil {
+             photoImage = photo.image!
+         } */else {
+                    // This is the interesting case. The photo has an image name, but it is not downloaded yet.
+         
+             // Start the task that will eventually download the image
+             let task = FlickrClient.sharedInstance().getFlickrImage(FlickrClient.Constants.Flickr.imageSize, filePath: photo.imagePath!, completionHandlerForImage: { (imageData, error) in
+                
+             
+             //let task = Flickr.sharedInstance().getFlickrImage(photo.imagePath!) { imageData, error in
+             
+             if let error = error {
+                 print("Image download error: \(error.localizedDescription)")
+             }
+                
+             
+                if let data = imageData {
+                    
+                 
+                    print("Image download successful")
+                 
+                    // Create the image
+                    let image = UIImage(data: data)
+                     
+                    // update the model, so that the information gets cashed
+                    //photo.image = image
+                     
+                    // update the cell later, on the main thread
+                     
+                    dispatch_async(dispatch_get_main_queue()) {
+                        cell.imageView!.image = image
+                    }
+                }
+             })
+             
+                 cell.taskToCancelifCellIsReused = task
+         }
+         
+         cell.imageView!.image = photoImage
+         
+         
+         // If the cell is "selected" it's color panel is grayed out
+         if let _ = selectedIndexes.indexOf(indexPath) {
+             cell.alpha = 0.05
+         } else {
+             cell.alpha = 1.0
+         }
      }
-     
-     if let data = imageData {
-     
-     print("Image download successful")
-     
-     // Create the image
-     let image = UIImage(data: data)
-     
-     // update the model, so that the information gets cashed
-     photo.image = image
-     
-     // update the cell later, on the main thread
-     
-     dispatch_async(dispatch_get_main_queue()) {
-     cell.imageView!.image = image
-     }
-     }
-     }
-     
-     cell.taskToCancelifCellIsReused = task
-     }
-     
-     cell.imageView!.image = photoImage
-     
-     
-     // If the cell is "selected" it's color panel is grayed out
-     if let _ = selectedIndexes.indexOf(indexPath) {
-     cell.alpha = 0.05
-     } else {
-     cell.alpha = 1.0
-     }
-     }
-     */
+    
     
     /*
      override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {

@@ -25,6 +25,8 @@ extension FlickrClient {
             static let SearchBBoxHalfHeight = 1.0
             static let SearchLatRange = (-90.0, 90.0)
             static let SearchLonRange = (-180.0, 180.0)
+            
+            static let imageSize = "_n"
         }
         
         // MARK: Flickr Parameter Keys
@@ -44,7 +46,7 @@ extension FlickrClient {
         
         // MARK: Flickr Parameter Values
         struct FlickrParameterValues {
-            static let SearchMethod = "flickr.photos.geo.photosForLocation"
+            static let SearchMethod = "flickr.photos.search"
             static let APIKey = "40af902e5097cc652785864f8a4d715c"
             static let ResponseFormat = "json"
             static let DisableJSONCallback = "1" /* 1 means "yes" */
@@ -61,6 +63,7 @@ extension FlickrClient {
             static let Photos = "photos"
             static let Photo = "photo"
             static let Title = "title"
+            static let ID = "id"
             static let MediumURL = "url_m"
             static let Pages = "pages"
             static let Total = "total"
@@ -83,6 +86,7 @@ extension FlickrClient {
             static let imageData = "imageData"
             static let imageTitle = "imageTitle"
             static let imagePath = "imagePath"
+            static let imageID = "imageID"
             
         }
         

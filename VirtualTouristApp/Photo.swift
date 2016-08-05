@@ -13,8 +13,9 @@ import Foundation
 struct Photo {
     
     //MARK: Properties
-    let imagePath: String?
     let imageTitle: String?
+    let imageID: String!
+    let imagePath: String!
    
     
     //MARK: Initializers
@@ -22,20 +23,21 @@ struct Photo {
     //construct a Photo from a dictionary
     
     init(dictionary: [String:AnyObject]) {
-        imagePath = dictionary[FlickrClient.Constants.JSONResponseKeys.imagePath] as? String
-        imageTitle = dictionary[FlickrClient.Constants.JSONResponseKeys.imageTitle] as? String
+        imageTitle = dictionary[FlickrClient.Constants.FlickrResponseKeys.Title] as? String
+        imageID = dictionary[FlickrClient.Constants.FlickrResponseKeys.ID] as! String
+        imagePath = dictionary[FlickrClient.Constants.FlickrResponseKeys.MediumURL] as! String
     }
     
-    static func pinsFromResults(results: [[String:AnyObject]]) -> [Photo] {
+    static func photosFromResults(results: [[String:AnyObject]]) -> [Photo] {
         
-        var pins = [Photo]()
+        var photos = [Photo]()
         
         // iterate through results array of dictionaries, each result is a dictionary
         for result in results {
-            pins.append(Photo(dictionary: result))
+            photos.append(Photo(dictionary: result))
         }
         
-        return pins
+        return photos
     }
     
     
