@@ -51,12 +51,12 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     }
     
     func loadTempImages() {
-        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
-        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
-        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
-        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
-        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
-        tempImages.append(UIImage(named: "placeholderImage50x50.png")!)
+        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
+        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
+        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
+        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
+        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
+        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -112,7 +112,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
-        return photos.count         //tempImages.count
+        return  photos.count   //tempImages.count
         
         /*
          let sectionInfo = fetchedResultsController.sections![section]
@@ -148,7 +148,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
          
          // Set the Flickr Image
          if photo.imagePath == nil || photo.imagePath == "" {
-             photoImage = UIImage(named: "VirtualTourist_76")!
+             photoImage = UIImage(named: "placeholderImageCamera-300px.png")!
          } /*else if photo.image != nil {
              photoImage = photo.image!
          } */else {

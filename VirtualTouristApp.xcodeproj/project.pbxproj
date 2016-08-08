@@ -33,6 +33,7 @@
 		9CBDC9231D4C00B50030A42D /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBDC9221D4C00B50030A42D /* Pin.swift */; };
 		9CBDC9251D4C04B40030A42D /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBDC9241D4C04B40030A42D /* Photo.swift */; };
 		9CBDC9271D4C07460030A42D /* PinsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBDC9261D4C07460030A42D /* PinsManager.swift */; };
+		9CD2AAC51D590556008AEE38 /* placeholderImageCamera-300px.png in Resources */ = {isa = PBXBuildFile; fileRef = 9CD2AAC41D590556008AEE38 /* placeholderImageCamera-300px.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +86,7 @@
 		9CBDC9221D4C00B50030A42D /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		9CBDC9241D4C04B40030A42D /* Photo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		9CBDC9261D4C07460030A42D /* PinsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinsManager.swift; sourceTree = "<group>"; };
+		9CD2AAC41D590556008AEE38 /* placeholderImageCamera-300px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "placeholderImageCamera-300px.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +125,7 @@
 		9CA09FE91D541146006C9A76 /* Virtual Tourist App Icons */ = {
 			isa = PBXGroup;
 			children = (
+				9CD2AAC41D590556008AEE38 /* placeholderImageCamera-300px.png */,
 				9CA09FF61D541596006C9A76 /* placeholderImage.png */,
 				9CA09FFE1D54EDDB006C9A76 /* placeholderImage50x50.png */,
 				9CA09FF81D54ECD5006C9A76 /* placeholderImage50x100.png */,
@@ -331,6 +334,7 @@
 				9CA09FFF1D54EDDB006C9A76 /* placeholderImage50x50.png in Resources */,
 				9CA09FFD1D54ECE6006C9A76 /* placeholderImage200x200.png in Resources */,
 				9CA09FF41D541146006C9A76 /* VirtualTourist_512.png in Resources */,
+				9CD2AAC51D590556008AEE38 /* placeholderImageCamera-300px.png in Resources */,
 				9CA09FF31D541146006C9A76 /* VirtualTourist_180.png in Resources */,
 				9CA09FF11D541146006C9A76 /* VirtualTourist_120.png in Resources */,
 				9CA09FF01D541146006C9A76 /* VirtualTourist_1024.png in Resources */,
