@@ -52,7 +52,7 @@
         <!--Photo Album View Controller-->
         <scene sceneID="H5Z-kx-lZ8">
             <objects>
-                <viewController id="lym-5n-VC7" customClass="PhotoAlbumViewController" customModule="VirtualTouristApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PhotoAlbumVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="lym-5n-VC7" customClass="PhotoAlbumViewController" customModule="VirtualTouristApp" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="MGe-PP-IaG"/>
                         <viewControllerLayoutGuide type="bottom" id="fuP-ev-fUM"/>

@@ -17,11 +17,11 @@ class FlickrClient : NSObject {
     var session = NSURLSession.sharedSession()
     
     //TODO: get these values from Core Data instead
-    var latitude:Double?
-    var longitude:Double?
-    var annotationTitle: String?
+    //var latitude:Double?
+    //var longitude:Double?
+    //var annotationTitle: String?
     
-    private func bboxString() -> String {
+    private func bboxString(latitude: Double?, longitude: Double?) -> String {
         // ensure bbox is bounded by minimum and maximums
         if let latitude = latitude, let longitude = longitude {
             let minimumLon = max(longitude - Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.0)
@@ -38,13 +38,13 @@ class FlickrClient : NSObject {
     // MARK: Flickr API
     
     //Get a random page number of pages searched on Flickr
-    func getPagesFromFlickrBySearch(completionHandlerForFlickrPages: (randomPageNumber: Int?, error: NSError?) -> Void) {
+    func getPagesFromFlickrBySearch(latitude: Double?, longitude: Double?, completionHandlerForFlickrPages: (randomPageNumber: Int?, error: NSError?) -> Void) {
         
         /* 1. Specify parameters, method (if has {key}), and HTTP body (if POST) */
         let methodParameters: [String : AnyObject] = [
             Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod,
             Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey,
-            Constants.FlickrParameterKeys.BoundingBox: bboxString(),
+            Constants.FlickrParameterKeys.BoundingBox: bboxString(latitude, longitude: longitude),
             Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch,
             Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL,
             Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat,
@@ -92,13 +92,13 @@ class FlickrClient : NSObject {
     }
     
     //Get images from Flickr to display in collection view
-    func displayImagesFromFlickrBySearch(withPageNumber: Int, completionHandlerForFlickrImages: (photos: [Photo]?, error: NSError?) -> Void) {
+    func displayImagesFromFlickrBySearch(latitude: Double?, longitude: Double?, withPageNumber: Int, completionHandlerForFlickrImages: (photos: [[String: AnyObject]]?, error: NSError?) -> Void) {
         
         /* 1. Specify parameters, method (if has {key}), and HTTP body (if POST) */
         let methodParameters: [String : AnyObject] = [
             Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod,
             Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey,
-            Constants.FlickrParameterKeys.BoundingBox: bboxString(),
+            Constants.FlickrParameterKeys.BoundingBox: bboxString(latitude, longitude: longitude),
             Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch,
             Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL,
             Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat,
@@ -132,8 +132,9 @@ class FlickrClient : NSObject {
                             displayError("No Photos Found. Search Again.")
                             return
                         } else {
-                            let photos = Photo.photosFromResults(photosArray)
-                            completionHandlerForFlickrImages(photos: photos, error: nil)
+                            //TODO: remove this line??
+                            //let photos = Photo.photosFromResults(photosArray)
+                            completionHandlerForFlickrImages(photos: photosArray, error: nil)
                         }
                         
                     } else {

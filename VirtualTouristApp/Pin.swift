@@ -7,43 +7,28 @@
 //
 
 import Foundation
+import CoreData
+import MapKit
+
 
 //MARK: Pin
 
-struct Pin {
+class Pin: NSManagedObject {
     
-    //MARK: Properties
-    let annotationID: String?
-    let annotationTitle: String?
-    let latitude: Double
-    let longitude: Double
-    let page: Int64?
-    let perPage: Int64?
-    
-    //MARK: Initializers
-    
-    //construct a Pin from a dictionary
-    
-    init(dictionary: [String:AnyObject]) {
-        annotationID = dictionary[FlickrClient.Constants.JSONResponseKeys.annotationID] as? String
-        annotationTitle = dictionary[FlickrClient.Constants.JSONResponseKeys.annotationTitle] as? String
-        latitude = dictionary[FlickrClient.Constants.JSONResponseKeys.latitude] as! Double
-        longitude = dictionary[FlickrClient.Constants.JSONResponseKeys.longitude] as! Double
-        page = dictionary[FlickrClient.Constants.JSONResponseKeys.page] as? Int64
-        perPage = dictionary[FlickrClient.Constants.JSONResponseKeys.perPage] as? Int64
+
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
-    static func pinsFromResults(results: [[String:AnyObject]]) -> [Pin] {
+    init(annotation: MKPointAnnotation, context: NSManagedObjectContext) {
+        let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: context)!
         
-        var pins = [Pin]()
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
         
-        // iterate through results array of dictionaries, each result is a dictionary
-        for result in results {
-            pins.append(Pin(dictionary: result))
-        }
-        
-        return pins
+        latitude = annotation.coordinate.latitude as Double
+        longitude = annotation.coordinate.longitude as Double
+        annotationTitle = annotation.title
     }
 
-    
+        
 }

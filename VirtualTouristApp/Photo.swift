@@ -7,38 +7,26 @@
 //
 
 import Foundation
+import CoreData
 
 //MARK: Photo
 
-struct Photo {
+class Photo: NSManagedObject {
     
-    //MARK: Properties
-    let imageTitle: String?
-    let imageID: String!
-    let imagePath: String!
-   
-    
-    //MARK: Initializers
-    
-    //construct a Photo from a dictionary
-    
-    init(dictionary: [String:AnyObject]) {
-        imageTitle = dictionary[FlickrClient.Constants.FlickrResponseKeys.Title] as? String
-        imageID = dictionary[FlickrClient.Constants.FlickrResponseKeys.ID] as! String
-        imagePath = dictionary[FlickrClient.Constants.FlickrResponseKeys.MediumURL] as! String
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?){
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
-    static func photosFromResults(results: [[String:AnyObject]]) -> [Photo] {
+    init(dictionary: [String : AnyObject], context: NSManagedObjectContext) {
         
-        var photos = [Photo]()
+        let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
         
-        // iterate through results array of dictionaries, each result is a dictionary
-        for result in results {
-            photos.append(Photo(dictionary: result))
-        }
-        
-        return photos
+        // Dictionary
+        imageID = dictionary[FlickrClient.Constants.FlickrResponseKeys.ID] as? String
+        imagePath = dictionary[FlickrClient.Constants.FlickrResponseKeys.MediumURL] as? String
+        imageData = dictionary["imageData"] as? NSData
+        //TODO: add pinData to link to pin location?
     }
-    
-    
+
 }

@@ -8,14 +8,24 @@
 
 import UIKit
 import MapKit
+import CoreData
 
-class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, MKMapViewDelegate {
+class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
     
     //Properties:
     var selectedIndexes = [NSIndexPath]()
-    var photos: [Photo]!
-    var tempImages = [UIImage]()
+    //var photos: [Photo]!
+    //var tempImages = [UIImage]()
     let annotation = MKPointAnnotation()
+    var tappedPin: Pin!
+    
+    lazy var sharedContext: NSManagedObjectContext = {
+        // Get the stack
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let stack = delegate.stack
+        return stack.context
+    }()
+
     
     @IBOutlet var mapView: MKMapView!
     
@@ -24,6 +34,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     @IBOutlet var flowLayout: UICollectionViewFlowLayout!
     
     @IBAction func newCollectionButton(sender: AnyObject) {
+        //TODO: implement this newCollectionButton with collectionItemAtIndexPath method detail
     }
     
     
@@ -31,53 +42,39 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
-                //photoAlbumVC.registerClass(PhotoCollectionViewCell.self, forCellWithReuseIdentifier: "PhotoCell")
+        //Core Data implementation
+        fetchedResultsController.delegate = self
         
-                //loadTempImages()
-        
-        annotation.coordinate.latitude = FlickrClient.sharedInstance().latitude!
-        annotation.coordinate.longitude = FlickrClient.sharedInstance().longitude!
-        annotation.title = FlickrClient.sharedInstance().annotationTitle
-        centerMapOnLocation(annotation, regionRadius: 500.0)
+        annotation.coordinate.latitude = tappedPin?.latitude as! Double
+        annotation.coordinate.longitude = tappedPin?.longitude as! Double
     
         mapView.delegate = self
         mapView.addAnnotation(annotation)
         
+        centerMapOnLocation(annotation, regionRadius: 500.0)
+        
         //implement cell flowLayout
         cellFlowLayout(photoAlbumVC.frame.size)
         
-        photos = [Photo]()
+        //load saved pins
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("There was an error fetching on load of PhotoAlbumVC")
+        }
+        
 
     }
     
-    func loadTempImages() {
-        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
-        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
-        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
-        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
-        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
-        tempImages.append(UIImage(named: "placeholderImageCamera-300px.png")!)
-    }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        FlickrClient.sharedInstance().getPagesFromFlickrBySearch { (randomPageNumber, error) in
-            if let randomPageNumber = randomPageNumber {
-                FlickrClient.sharedInstance().displayImagesFromFlickrBySearch(randomPageNumber, completionHandlerForFlickrImages: { (photos, error) in
-                    if let photos = photos {
-                        self.photos = photos
-                        
-                        print("Network calls to Flickr successful, here is the photos array.")
-                        print("This is how many photos are in the array: \(photos.count).")
-                        print(photos)
-                        performUIUpdatesOnMain{
-                            self.photoAlbumVC.reloadData()
-                        }
-                    }
-                })
-            }
+        if fetchedResultsController.fetchedObjects?.count == 0 {
+            loadPhotoAlbum()
         }
+        //TODO: add else statement to load photos from Core Data if FRC already has photos in it
+        
     }
     
     func cellFlowLayout(size: CGSize) {
@@ -101,37 +98,72 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         
     }
     
+    func loadPhotoAlbum() {
+        print("loadPhotoAlbum called")
+        
+        // Get images from Flickr client
+        FlickrClient.sharedInstance().getPagesFromFlickrBySearch(Double((tappedPin.latitude)!), longitude: Double((tappedPin.longitude)!), completionHandlerForFlickrPages:  { (randomPageNumber, error) in
+            if let randomPageNumber = randomPageNumber {
+                FlickrClient.sharedInstance().displayImagesFromFlickrBySearch(Double((self.tappedPin.latitude)!), longitude: Double((self.tappedPin.longitude)!), withPageNumber: randomPageNumber, completionHandlerForFlickrImages: { (photos, error) in
+                    if let photos = photos {
+                    
+                        print("Network calls to Flickr successful, here is the photos array.")
+                        print("This is how many photos are in the array: \(photos.count).")
+                        print(photos)
+                        
+                        performUIUpdatesOnMain{
+                            
+                            // parse the photos (array of dictionaries) and create Core Data objects
+                            _ = photos.map() { (dictionary: [String: AnyObject]) -> Photo in
+                                let photo = Photo(dictionary: dictionary, context: self.sharedContext)
+                                photo.pinData = self.tappedPin
+                                do {
+                                    try self.sharedContext.save()
+                                } catch {
+                                    fatalError("Failure to save context in loadPhotoAlbum: \(error)")
+                                }
+                                return photo
+                            }
+                        }
+                        
+                        
+                        
+                        
+                    } else {
+                        print("The error is in the second Flickr method getting the images. Error: \(error)")
+                        //TODO: add error handling for second Flickr Method to screen???
+                    }
+                })
+            } else {
+                print("The error is in the first Flickr method getting the page number. Error: \(error)")
+                //TODO: add error handling for first Flickr method to screen???
+            }
+        })
+
+    }
+    
     //MARK: Collection View Methods
     
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 1
-        //return fetchedResultsController.sections?.count ?? 0
+        // return the number of sections
+        
+        return fetchedResultsController.sections?.count ?? 0
     }
     
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of items
-        return  photos.count   //tempImages.count
+        // return the number of items
         
-        /*
-         let sectionInfo = fetchedResultsController.sections![section]
-         
-         print("number Of Cells: \(sectionInfo.numberOfObjects)")
-         return sectionInfo.numberOfObjects
-         */
+        return fetchedResultsController.sections![section].numberOfObjects ?? 0
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = photoAlbumVC.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
         
-        //cell.imageView?.image = tempImages[indexPath.row]
+        let cell = photoAlbumVC.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
         
         configureCell(cell, atIndexPath: indexPath)
         
         return cell
-        
-        //cell.backgroundView = imageView
     }
     
     
@@ -143,22 +175,21 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
          
          cell.imageView.image = nil
          
-         let photo = photos[indexPath.item]
-            //self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
          
          // Set the Flickr Image
          if photo.imagePath == nil || photo.imagePath == "" {
              photoImage = UIImage(named: "placeholderImageCamera-300px.png")!
          } /*else if photo.image != nil {
-             photoImage = photo.image!
+             //TODO: Fix this so it checks Core Data before downloading from Flickr
+             photoImage = photo.image! *******************************************UN COMMENT THIS BEFORE RUNNING
          } */else {
-                    // This is the interesting case. The photo has an image name, but it is not downloaded yet.
+                    // This is the interesting case. The photo has an image name, but it is not downloaded yet.************************DELETE THIS
          
              // Start the task that will eventually download the image
-             let task = FlickrClient.sharedInstance().getFlickrImage(FlickrClient.Constants.Flickr.imageSize, filePath: photo.imagePath!, completionHandlerForImage: { (imageData, error) in
-                
-             
-             //let task = Flickr.sharedInstance().getFlickrImage(photo.imagePath!) { imageData, error in
+             let task = FlickrClient.sharedInstance().getFlickrImage(FlickrClient.Constants.Flickr.imageSize,
+                                                                     filePath: photo.imagePath!,
+                                                                     completionHandlerForImage: { (imageData, error) in
              
              if let error = error {
                  print("Image download error: \(error.localizedDescription)")
@@ -173,9 +204,14 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
                     // Create the image
                     let image = UIImage(data: data)
                      
-                    // update the model, so that the information gets cashed
-                    //photo.image = image
-                     
+                    // save in Core Data
+                    photo.imageData = data
+                    do {
+                        try self.sharedContext.save()
+                    } catch {
+                        fatalError("Failure to save context of imageData: \(error)")
+                    }
+                    
                     // update the cell later, on the main thread
                      
                     dispatch_async(dispatch_get_main_queue()) {
@@ -198,7 +234,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
          }
      }
     
-    
+    //TODO: Implement collectionView didSelectItemAtIndexPath for New Collection button ****************************************************
     /*
      override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
      // If a meme is selected in the collection view navigate to the detailMemeViewController to display the meme
@@ -238,15 +274,81 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         mapView.setRegion(coordinateRegion, animated: true)
     }
     
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-     // Get the new view controller using segue.destinationViewController.
-     // Pass the selected object to the new view controller.
-     }
-     */
+
+    
+    // MARK: NSFetchedResultsController
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        
+        let fetchRequest = NSFetchRequest(entityName: "Photo")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "imageID", ascending: true)]
+        //fetchRequest.predicate = NSPredicate(format: "pinData == %@", self.tappedPin!)
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
+                                                                  managedObjectContext: self.sharedContext,
+                                                                  sectionNameKeyPath: nil,
+                                                                  cacheName: nil)
+        
+        return fetchedResultsController
+        
+    }()
+    
+    //TODO: Do I need both of these??
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        self.photoAlbumVC.reloadData()
+    }
+
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        self.photoAlbumVC.reloadData()
+    }
+    
+    func controller(controller: NSFetchedResultsController,
+                    didChangeSection sectionInfo: NSFetchedResultsSectionInfo,
+                                     atIndex sectionIndex: Int,
+                                             forChangeType type: NSFetchedResultsChangeType) {
+        
+        let set = NSIndexSet(index: sectionIndex)
+        
+        switch (type){
+            
+        case .Insert:
+            photoAlbumVC?.insertSections(set)
+            
+        case .Delete:
+            photoAlbumVC?.deleteSections(set)
+            
+        default:
+            // irrelevant in our case
+            break
+            
+        }
+    }
+    
+    func controller(controller: NSFetchedResultsController,
+                    didChangeObject anObject: AnyObject,
+                                    atIndexPath indexPath: NSIndexPath?,
+                                                forChangeType type: NSFetchedResultsChangeType,
+                                                              newIndexPath: NSIndexPath?) {
+        
+        
+        
+        switch(type){
+            
+        case .Insert:
+            photoAlbumVC?.insertItemsAtIndexPaths([newIndexPath!])
+            
+        case .Delete:
+            photoAlbumVC?.deleteItemsAtIndexPaths([indexPath!])
+            
+        case .Update:
+            photoAlbumVC?.reloadItemsAtIndexPaths([indexPath!])
+            
+        case .Move:
+            photoAlbumVC?.deleteItemsAtIndexPaths([indexPath!])
+            photoAlbumVC?.insertItemsAtIndexPaths([newIndexPath!])
+        }
+        
+    }
+
     
 }
 
