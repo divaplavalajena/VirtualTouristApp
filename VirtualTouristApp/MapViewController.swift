@@ -16,7 +16,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     var annotations = [MKPointAnnotation]()
     let locationManager = CLLocationManager()
     var currentPin: Pin? = nil
-    //var pins = [Pin]()
     
     lazy var sharedContext: NSManagedObjectContext = {
         // Get the stack
@@ -67,18 +66,20 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         annotation.coordinate = touchMapCoordinate
         
         // Create new Pin object in Core Data managedObjectContext
-        //TODO: Does the save to context work???
+        //TODO: Does the save to context work??? NOT YET!!
         let pin = Pin(annotation: annotation, context: sharedContext)
-        currentPin = pin
+        pin.latitude = annotation.coordinate.latitude
+        pin.longitude = annotation.coordinate.longitude
         
         do {
             try sharedContext.save()
+            print("Saving context in handleLongPress")
         } catch {
             fatalError("Failure to save context in handleLongPress: \(error)")
         }
         
         mapView.addAnnotation(annotation)
-        print("The tapped pin has a latitude of \(currentPin!.latitude!) and a longitude of \(currentPin!.longitude!) with a title of \(currentPin!.annotationTitle)")
+        print("The tapped pin (from handleLongPress) has a latitude of \(pin.latitude!) and a longitude of \(pin.longitude!) with a title of \(pin.annotationTitle)")
     }
     
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
@@ -95,15 +96,17 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         // Get location on app launch and set it as first location - save it in Core Data managedObjectContext
         //TODO: Does the save to context work???
         let pin = Pin(annotation: annotation, context: sharedContext)
-        currentPin = pin
+        pin.latitude = annotation.coordinate.latitude
+        pin.longitude = annotation.coordinate.longitude
         
         do {
             try sharedContext.save()
+            print("Saving context in locationManager")
         } catch {
             fatalError("Failure to save context in locationManager: \(error)")
         }
         
-        print("The locationManger pin (on app launch) has a latitude of \(currentPin!.latitude!) and a longitude of \(currentPin!.longitude!) with a title of \(currentPin!.annotationTitle)")
+        print("The locationManger pin (on app launch) has a latitude of \(pin.latitude!) and a longitude of \(pin.longitude!) with a title of \(pin.annotationTitle)")
         
         centerMapOnLocation(annotation, regionRadius: 1000.0)
     }
@@ -124,16 +127,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     //Test data to see if map is working
     func addMapLocations() {
         
-        //TODO: add locations saved in Core Data persistence....fetchedResultsController????
-        
         // Fetch request of managedObjectContext to get Pin instances from Core Data if they exist 
         // and add them to annotations array to populate map
         let request = NSFetchRequest(entityName: "Pin")
         do {
             let results = try sharedContext.executeFetchRequest(request) as! [Pin]
             if (results.count > 0) {
+                print("Pin objects count: \(results.count) found in Core Data listed here:")
                 for result in results {
-                    print(result.latitude)
+                    print(result.latitude!)
                     let latitude = result.latitude as! Double
                     let longitude = result.longitude as! Double
                     let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -187,32 +189,27 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     // The segue to the PhotoAlbumVC is performed from the direct pin tap
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         
-        //TODO: set pinData value = assign pin values to the photo object that will download on next view controller
-        // Or is that value set automatically becuase the relationship is set up in Core Data?
-        
         let annotation = MKPointAnnotation()
         annotation.coordinate = (view.annotation?.coordinate)!
-        //let pin = Pin
+        let pin = Pin(annotation: annotation, context: sharedContext)
         
-        print("The tapped pin has a latitude of \(annotation.coordinate.latitude) and a longitude of \(annotation.coordinate.longitude).")
+        print("The tapped pin (from mapView didSelectAnnotationView) has a latitude of \(annotation.coordinate.latitude) and a longitude of \(annotation.coordinate.longitude).")
         
         let request = NSFetchRequest(entityName: "Pin")
         do {
             let results = try sharedContext.executeFetchRequest(request) as! [Pin]
+            print(results)
             if (results.count > 0) {
                 for result in results {
                     if result.latitude == annotation.coordinate.latitude {
-                        //pin.latitude = annotation.coordinate.latitude
-                        //pin.longitude = annotation.coordinate.longitude
-                        print("The fetched latitude is \(result.latitude!) and the annotation latitude is \(annotation.coordinate.latitude)")
-                        let photoAlbumVC = storyboard?.instantiateViewControllerWithIdentifier("PhotoAlbumVC") as! PhotoAlbumViewController
-                        navigationController?.pushViewController(photoAlbumVC, animated: true)
-                        photoAlbumVC.tappedPin.latitude = result.latitude
-                        photoAlbumVC.tappedPin.longitude = result.longitude
-                        
+                        pin.latitude = annotation.coordinate.latitude
+                        pin.longitude = annotation.coordinate.longitude
                     }
-                    
                 }
+                // Segue to PhotoAlbumVC with pin info being passed to tappedPin
+                print("The fetched latitude is \(pin.latitude!) and the annotation latitude is \(annotation.coordinate.latitude)")
+                performSegueWithIdentifier("showPhotoAlbumVC", sender: pin)
+                
             } else {
                 print("No Pin objects in Core Data on mapView select")
                 return
@@ -220,8 +217,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         } catch let error as NSError {
             print("Fetch failed: \(error.localizedDescription)")
         }
-        
-        //performSegueWithIdentifier("showPhotoAlbumVC", sender: pin)
         
         mapView.deselectAnnotation(view.annotation, animated: true)
         

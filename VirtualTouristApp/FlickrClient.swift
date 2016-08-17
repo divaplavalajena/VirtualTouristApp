@@ -132,8 +132,7 @@ class FlickrClient : NSObject {
                             displayError("No Photos Found. Search Again.")
                             return
                         } else {
-                            //TODO: remove this line??
-                            //let photos = Photo.photosFromResults(photosArray)
+                            //completion handler passes photosArray to ViewController calling for further processing...
                             completionHandlerForFlickrImages(photos: photosArray, error: nil)
                         }
                         

@@ -14,8 +14,6 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     //Properties:
     var selectedIndexes = [NSIndexPath]()
-    //var photos: [Photo]!
-    //var tempImages = [UIImage]()
     let annotation = MKPointAnnotation()
     var tappedPin: Pin!
     
@@ -59,8 +57,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         //load saved pins
         do {
             try fetchedResultsController.performFetch()
+            print("FRC called on viewDidLoad to perform fetch")
         } catch {
-            print("There was an error fetching on load of PhotoAlbumVC")
+            print("There was an error fetching on viewDidLoad of PhotoAlbumVC")
         }
         
 
@@ -72,9 +71,12 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         
         if fetchedResultsController.fetchedObjects?.count == 0 {
             loadPhotoAlbum()
+        } else {
+            //TODO: add else statement to load photos from Core Data if FRC already has photos in it
+            //load saved photos at pin location - how does Core Data know this?
+            self.photoAlbumVC.reloadData()
+            
         }
-        //TODO: add else statement to load photos from Core Data if FRC already has photos in it
-        
     }
     
     func cellFlowLayout(size: CGSize) {
@@ -111,7 +113,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
                         print("This is how many photos are in the array: \(photos.count).")
                         print(photos)
                         
-                        performUIUpdatesOnMain{
+                        dispatch_async(dispatch_get_main_queue()) {
                             
                             // parse the photos (array of dictionaries) and create Core Data objects
                             _ = photos.map() { (dictionary: [String: AnyObject]) -> Photo in
@@ -125,9 +127,6 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
                                 return photo
                             }
                         }
-                        
-                        
-                        
                         
                     } else {
                         print("The error is in the second Flickr method getting the images. Error: \(error)")
@@ -154,7 +153,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // return the number of items
         
-        return fetchedResultsController.sections![section].numberOfObjects ?? 0
+        return fetchedResultsController.sections![section].numberOfObjects ?? 21
+        //(tappedPin.photos?.count)!
+        //fetchedResultsController.sections![section].numberOfObjects ?? 0
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
@@ -171,7 +172,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
      func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
      
-         var photoImage = UIImage()
+         var photoImage = UIImage(named: "placeholderImageCamera-300px.png")
          
          cell.imageView.image = nil
          
@@ -180,12 +181,12 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
          // Set the Flickr Image
          if photo.imagePath == nil || photo.imagePath == "" {
              photoImage = UIImage(named: "placeholderImageCamera-300px.png")!
-         } /*else if photo.image != nil {
+            
+         } else if photo.imageData != nil {
              //TODO: Fix this so it checks Core Data before downloading from Flickr
-             photoImage = photo.image! *******************************************UN COMMENT THIS BEFORE RUNNING
-         } */else {
-                    // This is the interesting case. The photo has an image name, but it is not downloaded yet.************************DELETE THIS
-         
+             photoImage = UIImage(data: photo.imageData!)
+         } else {
+            
              // Start the task that will eventually download the image
              let task = FlickrClient.sharedInstance().getFlickrImage(FlickrClient.Constants.Flickr.imageSize,
                                                                      filePath: photo.imagePath!,
@@ -193,12 +194,15 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
              
              if let error = error {
                  print("Image download error: \(error.localizedDescription)")
+                photoImage = UIImage(named: "placeholderImageCamera-300px.png")
+                dispatch_async(dispatch_get_main_queue()) {
+                    cell.imageView.image = photoImage
+                }
              }
                 
              
                 if let data = imageData {
                     
-                 
                     print("Image download successful")
                  
                     // Create the image
@@ -281,7 +285,8 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         
         let fetchRequest = NSFetchRequest(entityName: "Photo")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "imageID", ascending: true)]
-        //fetchRequest.predicate = NSPredicate(format: "pinData == %@", self.tappedPin!)
+        fetchRequest.predicate = NSPredicate(format: "pinData == %@", self.tappedPin!)
+        print("This is the fetchedResultsController being created with the tappedPin.latitude: \(self.tappedPin.latitude)")
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: self.sharedContext,
@@ -293,14 +298,20 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     }()
     
     //TODO: Do I need both of these??
+    /*
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
         self.photoAlbumVC.reloadData()
     }
-
+    */
+    
+    
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.photoAlbumVC.reloadData()
     }
-    
+ 
+ 
+    // TODO: Determine if I need these methods
+    /*
     func controller(controller: NSFetchedResultsController,
                     didChangeSection sectionInfo: NSFetchedResultsSectionInfo,
                                      atIndex sectionIndex: Int,
@@ -348,6 +359,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         }
         
     }
+    */
 
     
 }
