@@ -30,6 +30,7 @@ struct CoreDataStack {
             return nil}
         
         self.modelURL = modelURL
+        print(self.modelURL)
         
         // Try to create the model from the URL
         guard let model = NSManagedObjectModel(contentsOfURL: modelURL) else{
@@ -132,7 +133,7 @@ extension CoreDataStack{
 // MARK:  - Save
 extension CoreDataStack {
     
-    func save() {
+    func saveBothContexts() {
         // We call this synchronously, but it's a very fast
         // operation (it doesn't hit the disk). We need to know
         // when it ends so we can call the next save (on the persisting
@@ -171,7 +172,7 @@ extension CoreDataStack {
         
         if delayInSeconds > 0 {
             print("Autosaving")
-            save()
+            saveBothContexts()
             
             let delayInNanoSeconds = UInt64(delayInSeconds) * NSEC_PER_SEC
             let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delayInNanoSeconds))

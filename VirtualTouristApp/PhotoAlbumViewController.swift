@@ -29,7 +29,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     @IBOutlet var photoAlbumVC: UICollectionView!
     
-    @IBOutlet var flowLayout: UICollectionViewFlowLayout!
+    //@IBOutlet var flowLayout: UICollectionViewFlowLayout!
     
     @IBAction func newCollectionButton(sender: AnyObject) {
         //TODO: implement this newCollectionButton with collectionItemAtIndexPath method detail
@@ -52,7 +52,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         centerMapOnLocation(annotation, regionRadius: 500.0)
         
         //implement cell flowLayout
-        cellFlowLayout(photoAlbumVC.frame.size)
+        //cellFlowLayout(photoAlbumVC.frame.size)
         
         //load saved pins
         do {
@@ -79,26 +79,53 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         }
     }
     
-    func cellFlowLayout(size: CGSize) {
-        print("cellFlowLayout called")
-        //Layout the collection view so that the cells take up 1/3 of the width with no space between
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         
-        let space: CGFloat = 0.0
-        let dimension: CGFloat = size.width >= size.height ? (size.width - (5 * space)) / 6.0 : (size.width - (2 * space)) / 3.0
+        let flowLayout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        // OR lay out the collection view so that the cells take up 1/3 of the width with no space between
+        flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         
-        //flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        flowLayout.minimumLineSpacing = 0
-        flowLayout.minimumInteritemSpacing = 0
+        //2 - defines minimum spacing between horizontal items
+        flowLayout.minimumLineSpacing = 0.0
+        //3 - defines minimum spacing between vertical items
+        flowLayout.minimumInteritemSpacing = 0.0
         
-        //let width = floor(self.photoAlbumVC.frame.size.width/3)
-        //let screenWidth = self.photoAlbumVC.bounds.size.width
-        //let totalSpacing = flowLayout.minimumInteritemSpacing * 3.0
-        //let imageSize = (screenWidth - totalSpacing) / 3.0
-        flowLayout.itemSize = CGSizeMake(dimension, dimension)
+        let width = floor(self.photoAlbumVC.frame.size.width/3)
+        flowLayout.itemSize = CGSize(width: width, height: width)
         
         photoAlbumVC.collectionViewLayout = flowLayout
         
     }
+    
+    /*
+    func cellFlowLayout(size: CGSize) {
+        print("cellFlowLayout called")
+        //Layout the collection view so that the cells take up 1/3 of the width with no space between
+        
+        // 1 - calculating the image dimensions
+        //let space: CGFloat = 0.0
+        //let dimension: CGFloat = size.width >= size.height ? (size.width - (5 * space)) / 6.0 : (size.width - (2 * space)) / 3.0
+        
+        // OR lay out the collection view so that the cells take up 1/3 of the width with no space between
+        flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        
+        //2 - defines minimum spacing between horizontal items
+        flowLayout.minimumLineSpacing = 0.0
+        //3 - defines minimum spacing between vertical items
+        flowLayout.minimumInteritemSpacing = 0.0
+        
+        let width = floor(self.photoAlbumVC.frame.size.width/3)
+        //let screenWidth = self.photoAlbumVC.bounds.size.width
+        //let totalSpacing = flowLayout.minimumInteritemSpacing * 3.0
+        //let imageSize = (screenWidth - totalSpacing) / 3.0
+        
+        //flowLayout.itemSize = CGSizeMake(dimension, dimension)
+        flowLayout.itemSize = CGSize(width: width, height: width)
+        
+        photoAlbumVC.collectionViewLayout = flowLayout
+    }
+    */
     
     func loadPhotoAlbum() {
         print("loadPhotoAlbum called")
@@ -119,11 +146,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
                             _ = photos.map() { (dictionary: [String: AnyObject]) -> Photo in
                                 let photo = Photo(dictionary: dictionary, context: self.sharedContext)
                                 photo.pinData = self.tappedPin
-                                do {
-                                    try self.sharedContext.save()
-                                } catch {
-                                    fatalError("Failure to save context in loadPhotoAlbum: \(error)")
-                                }
+                                self.saveToBothContexts()
                                 return photo
                             }
                         }
@@ -171,6 +194,8 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     // MARK: - Configure Cell
     
      func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+        
+        //if let cell = self.photoAlbumVC.cellForItemAtIndexPath(indexPath) as? PhotoCollectionViewCell {
      
          var photoImage = UIImage(named: "placeholderImageCamera-300px.png")
          
@@ -202,22 +227,15 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
                 
              
                 if let data = imageData {
-                    
                     print("Image download successful")
-                 
                     // Create the image
                     let image = UIImage(data: data)
-                     
                     // save in Core Data
                     photo.imageData = data
-                    do {
-                        try self.sharedContext.save()
-                    } catch {
-                        fatalError("Failure to save context of imageData: \(error)")
-                    }
+                    
+                    self.saveToBothContexts()
                     
                     // update the cell later, on the main thread
-                     
                     dispatch_async(dispatch_get_main_queue()) {
                         cell.imageView!.image = image
                     }
@@ -228,8 +246,8 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
          }
          
          cell.imageView!.image = photoImage
-         
-         
+    //}
+    
          // If the cell is "selected" it's color panel is grayed out
          if let _ = selectedIndexes.indexOf(indexPath) {
              cell.alpha = 0.05
@@ -237,6 +255,12 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
              cell.alpha = 1.0
          }
      }
+    
+    func saveToBothContexts() {
+        // Save pin data to both contexts
+        let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
+        stack.saveBothContexts()
+    }
     
     //TODO: Implement collectionView didSelectItemAtIndexPath for New Collection button ****************************************************
     /*

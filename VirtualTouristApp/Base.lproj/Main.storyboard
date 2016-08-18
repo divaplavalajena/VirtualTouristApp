@@ -79,21 +79,21 @@
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="uob-ap-AK5">
                                 <rect key="frame" x="0.0" y="196" width="600" height="360"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="wIw-5O-6UK">
-                                    <size key="itemSize" width="102" height="77"/>
+                                    <size key="itemSize" width="100" height="100"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" reuseIdentifier="PhotoCell" id="eWq-lE-aH0" customClass="PhotoCollectionViewCell" customModule="VirtualTouristApp" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="102" height="77"/>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCell" id="eWq-lE-aH0" customClass="PhotoCollectionViewCell" customModule="VirtualTouristApp" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="102" height="77"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xx0-Hu-D4W">
-                                                    <rect key="frame" x="0.0" y="8" width="102" height="69"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                 </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
@@ -103,7 +103,7 @@
                                             <constraint firstAttribute="bottom" secondItem="xx0-Hu-D4W" secondAttribute="bottom" id="bNS-Lv-Dld"/>
                                             <constraint firstAttribute="trailing" secondItem="xx0-Hu-D4W" secondAttribute="trailing" id="la7-jR-byJ"/>
                                             <constraint firstItem="xx0-Hu-D4W" firstAttribute="leading" secondItem="eWq-lE-aH0" secondAttribute="leading" id="mYq-uJ-Yi6"/>
-                                            <constraint firstItem="xx0-Hu-D4W" firstAttribute="top" secondItem="eWq-lE-aH0" secondAttribute="topMargin" id="vb9-Lg-T7f"/>
+                                            <constraint firstItem="xx0-Hu-D4W" firstAttribute="top" secondItem="eWq-lE-aH0" secondAttribute="topMargin" constant="-8" id="vb9-Lg-T7f"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="imageView" destination="xx0-Hu-D4W" id="mg6-St-MfQ"/>
@@ -130,7 +130,6 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="uob-ap-AK5" firstAttribute="leading" secondItem="SBQ-eb-EcB" secondAttribute="leading" id="1LX-3d-VUi"/>
                             <constraint firstItem="7K2-Uo-FXG" firstAttribute="top" secondItem="MGe-PP-IaG" secondAttribute="bottom" id="6Na-TA-LJ0"/>
                             <constraint firstItem="7K2-Uo-FXG" firstAttribute="top" secondItem="uet-BL-Pon" secondAttribute="bottom" id="EIP-7Z-si7"/>
                             <constraint firstAttribute="trailing" secondItem="uet-BL-Pon" secondAttribute="trailing" id="FSk-Kn-lcn"/>
@@ -139,6 +138,8 @@
                             <constraint firstItem="uet-BL-Pon" firstAttribute="leading" secondItem="7K2-Uo-FXG" secondAttribute="leading" id="NVa-vJ-32i"/>
                             <constraint firstItem="SBQ-eb-EcB" firstAttribute="top" secondItem="uob-ap-AK5" secondAttribute="bottom" id="Twa-Zs-pzR"/>
                             <constraint firstItem="uet-BL-Pon" firstAttribute="trailing" secondItem="7K2-Uo-FXG" secondAttribute="trailing" id="XoF-ZS-H4Z"/>
+                            <constraint firstItem="SBQ-eb-EcB" firstAttribute="leading" secondItem="9CC-Rl-YWr" secondAttribute="leadingMargin" constant="-20" id="bdU-nx-4XV"/>
+                            <constraint firstItem="uob-ap-AK5" firstAttribute="leading" secondItem="9CC-Rl-YWr" secondAttribute="leading" id="kes-TO-5Qj"/>
                             <constraint firstItem="uet-BL-Pon" firstAttribute="leading" secondItem="9CC-Rl-YWr" secondAttribute="leading" id="rQ3-nm-Rya"/>
                             <constraint firstItem="uob-ap-AK5" firstAttribute="top" secondItem="MGe-PP-IaG" secondAttribute="bottom" constant="132" id="tzd-2l-xWW"/>
                             <constraint firstItem="uob-ap-AK5" firstAttribute="trailing" secondItem="SBQ-eb-EcB" secondAttribute="trailing" id="wWx-zw-yTc"/>
@@ -147,9 +148,8 @@
                     </view>
                     <navigationItem key="navigationItem" id="CgS-vt-pa5"/>
                     <connections>
-                        <outlet property="flowLayout" destination="wIw-5O-6UK" id="PV9-cN-rVW"/>
                         <outlet property="mapView" destination="7K2-Uo-FXG" id="eWL-Kg-qc9"/>
-                        <outlet property="photoAlbumVC" destination="uob-ap-AK5" id="Bdh-X8-JML"/>
+                        <outlet property="photoAlbumVC" destination="uob-ap-AK5" id="Q83-Bc-wmw"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tR0-h2-J1T" userLabel="First Responder" sceneMemberID="firstResponder"/>
