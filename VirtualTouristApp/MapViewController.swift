@@ -49,36 +49,38 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     }
     
     override func viewWillAppear(animated: Bool) {
-        //TODO: create method that will use pins already in core data to populate map OR do this in viewDidLoad?????
-        // Use addMapLocations() method (change it first) to do this within an IF statement
         
+        // Use addMapLocations() method (change it first) to do this within an IF statement
         addMapLocations()
     }
     
-    func savePinInContexts(pin: Pin) {
-        //func created to access save in CoreDataStack.saveBothContexts so both main and persisting contexts are saved
-        let pinInfo = pin
+    func savePinInContexts(annotation: MKPointAnnotation) {
+        //func -create pins and access save in CoreDataStack.saveBothContexts so both main and persisting contexts are saved
+        
+        let pinInfo = annotation
         
         let request = NSFetchRequest(entityName: "Pin")
         do {
             let results = try sharedContext.executeFetchRequest(request) as! [Pin]
             if (results.count == 0) {
                 print("No Pin objects in Core Data on savePinInContexts call.")
+                // Create new Pin object in Core Data managedObjectContext
+                _ = Pin(annotation: pinInfo, context: sharedContext)
                 // Save pin data to both contexts
                 let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
                 stack.saveBothContexts()
-                print("Pin data was saved to the contexts after fetch resturned results == 0: \(pinInfo.latitude!)")
+                print("Pin data was saved to the contexts after fetch resturned results == 0: \(pinInfo.coordinate.latitude)")
             }
             if (results.count > 0) {
                 for result in results {
-                    if result.latitude == pinInfo.latitude {
-                        print("Not saving becuase latitude already exists in Core Data context: \(pinInfo.latitude!)")
+                    if result.latitude == pinInfo.coordinate.latitude {
+                        print("Not saving becuase latitude already exists in Core Data context: \(pinInfo.coordinate.latitude)")
                         return
                     } else {
                         // Save pin data to both contexts
                         let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
                         stack.saveBothContexts()
-                        print("Pin data was saved to the contexts after fetch didn't find it in results: \(pinInfo.latitude!)")
+                        print("Pin data was saved to the contexts after fetch didn't find it in results: \(pinInfo.coordinate.latitude)")
                     }
                 }
             }
@@ -99,14 +101,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         let annotation = MKPointAnnotation()
         annotation.coordinate = touchMapCoordinate
         
-        // Create new Pin object in Core Data managedObjectContext
-        let pin = Pin(annotation: annotation, context: sharedContext)
-        
         mapView.addAnnotation(annotation)
-        print("The tapped pin (from handleLongPress) has a latitude of \(pin.latitude!) and a longitude of \(pin.longitude!) with a title of \(pin.annotationTitle)")
+        print("The tapped pin (from handleLongPress) has a latitude of \(annotation.coordinate.latitude) and a longitude of \(annotation.coordinate.longitude) with a title of \(annotation.title)")
         
         
-        savePinInContexts(pin)
+        savePinInContexts(annotation)
     }
     
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
@@ -120,14 +119,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         let annotation = MKPointAnnotation()
         annotation.coordinate = center
         
-        // Get location on app launch and set it as first location - save it in Core Data managedObjectContext
-        let pin = Pin(annotation: annotation, context: sharedContext)
-        
-        print("The locationManger pin (on app launch) has a latitude of \(pin.latitude!) and a longitude of \(pin.longitude!) with a title of \(pin.annotationTitle)")
+        print("The locationManger pin (on app launch) has a latitude of \(annotation.coordinate.latitude) and a longitude of \(annotation.coordinate.longitude) with a title of \(annotation.title)")
         
         centerMapOnLocation(annotation, regionRadius: 1000.0)
         
-        savePinInContexts(pin)
+        savePinInContexts(annotation)
     }
     
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError)

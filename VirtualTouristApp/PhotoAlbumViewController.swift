@@ -14,6 +14,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     //Properties:
     var selectedIndexes = [NSIndexPath]()
+    var insertedIndexPaths: [NSIndexPath]!
+    var deletedIndexPaths: [NSIndexPath]!
+    var updatedIndexPaths: [NSIndexPath]!
     let annotation = MKPointAnnotation()
     var tappedPin: Pin!
     
@@ -29,10 +32,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     @IBOutlet var photoAlbumVC: UICollectionView!
     
-    //@IBOutlet var flowLayout: UICollectionViewFlowLayout!
-    
     @IBAction func newCollectionButton(sender: AnyObject) {
         //TODO: implement this newCollectionButton with collectionItemAtIndexPath method detail
+        loadPhotoAlbum()
     }
     
     
@@ -128,6 +130,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     */
     
     func loadPhotoAlbum() {
+        
         print("loadPhotoAlbum called")
         
         // Get images from Flickr client
@@ -168,24 +171,29 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
         // return the number of sections
-        
         return fetchedResultsController.sections?.count ?? 0
     }
     
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // return the number of items
-        
         return fetchedResultsController.sections![section].numberOfObjects ?? 21
-        //(tappedPin.photos?.count)!
         //fetchedResultsController.sections![section].numberOfObjects ?? 0
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
         let cell = photoAlbumVC.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
+        //cell.activityIndicator.startAnimating()
         
         configureCell(cell, atIndexPath: indexPath)
+        
+        // If the cell is "selected" it's color panel is grayed out
+        if let _ = selectedIndexes.indexOf(indexPath) {
+            cell.alpha = 0.05
+        } else {
+            cell.alpha = 1.0
+        }
         
         return cell
     }
@@ -195,21 +203,25 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
      func configureCell(cell: PhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
         
-        //if let cell = self.photoAlbumVC.cellForItemAtIndexPath(indexPath) as? PhotoCollectionViewCell {
+        
      
          var photoImage = UIImage(named: "placeholderImageCamera-300px.png")
+        
+        
          
-         cell.imageView.image = nil
+         //cell.imageView.image = nil
          
          let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
          
          // Set the Flickr Image
          if photo.imagePath == nil || photo.imagePath == "" {
              photoImage = UIImage(named: "placeholderImageCamera-300px.png")!
+            cell.activityIndicator.startAnimating()
             
          } else if photo.imageData != nil {
-             //TODO: Fix this so it checks Core Data before downloading from Flickr
+             //Loads images from saved Core Data if picture content exists
              photoImage = UIImage(data: photo.imageData!)
+            
          } else {
             
              // Start the task that will eventually download the image
@@ -224,54 +236,65 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
                     cell.imageView.image = photoImage
                 }
              }
-                
-             
+
                 if let data = imageData {
                     print("Image download successful")
                     // Create the image
-                    let image = UIImage(data: data)
+                    photoImage = UIImage(data: data)!
+                    
                     // save in Core Data
                     photo.imageData = data
-                    
                     self.saveToBothContexts()
                     
                     // update the cell later, on the main thread
                     dispatch_async(dispatch_get_main_queue()) {
-                        cell.imageView!.image = image
+                        cell.imageView!.image = photoImage
+                        cell.activityIndicator.stopAnimating()
                     }
+                    
                 }
+                                                                        
              })
-             
-                 cell.taskToCancelifCellIsReused = task
+            
+            dispatch_async(dispatch_get_main_queue()) {
+                cell.taskToCancelifCellIsReused = task
+            }
          }
          
-         cell.imageView!.image = photoImage
-    //}
+        cell.imageView!.image = photoImage
+        dispatch_async(dispatch_get_main_queue()) {
+            cell.activityIndicator.stopAnimating()
+        }
+        
+        
+    }
     
-         // If the cell is "selected" it's color panel is grayed out
-         if let _ = selectedIndexes.indexOf(indexPath) {
-             cell.alpha = 0.05
-         } else {
-             cell.alpha = 1.0
-         }
+    // TODO: collectionView didSelectItemAtIndexPath for New Collection button???
+    
+     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        print("in collectionView(_:didSelectItemAtIndexPath)")
+        let cell = collectionView.cellForItemAtIndexPath(indexPath) as! PhotoCollectionViewCell
+        
+        // Whenever a cell is tapped we will toggle its presence in the selectedIndexes array
+        if let index = selectedIndexes.indexOf(indexPath) {
+            selectedIndexes.removeAtIndex(index)
+        } else {
+            selectedIndexes.append(indexPath)
+        }
+        
+        // Then reconfigure the cell
+        configureCell(cell, atIndexPath: indexPath)
+        
+        // And update the buttom button
+        //updateBottomButton()
      }
-    
+ 
+    // MARK: Save to Both Contexts function
     func saveToBothContexts() {
         // Save pin data to both contexts
         let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
         stack.saveBothContexts()
     }
-    
-    //TODO: Implement collectionView didSelectItemAtIndexPath for New Collection button ****************************************************
-    /*
-     override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-     // If a meme is selected in the collection view navigate to the detailMemeViewController to display the meme
-     let detailController = self.storyboard!.instantiateViewControllerWithIdentifier("DetailMemeViewController") as! DetailMemeViewController
-     detailController.meme = self.memes[indexPath.row]
-     self.navigationController!.pushViewController(detailController, animated: true)
-     
-     }
-     */
     
     // MARK: - MKMapViewDelegate
     
@@ -304,7 +327,8 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
 
     
-    // MARK: NSFetchedResultsController
+    // MARK: NSFetchedResultsController Methods
+    
     lazy var fetchedResultsController: NSFetchedResultsController = {
         
         let fetchRequest = NSFetchRequest(entityName: "Photo")
@@ -321,21 +345,17 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         
     }()
     
-    //TODO: Do I need both of these??
-    /*
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
-        self.photoAlbumVC.reloadData()
-    }
-    */
-    
-    
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        self.photoAlbumVC.reloadData()
+        //self.photoAlbumVC.reloadData()
+        
+        // We are about to handle some new changes. Start out with empty arrays for each change type
+        insertedIndexPaths = [NSIndexPath]()
+        deletedIndexPaths = [NSIndexPath]()
+        updatedIndexPaths = [NSIndexPath]()
+
     }
  
- 
-    // TODO: Determine if I need these methods
-    /*
+    
     func controller(controller: NSFetchedResultsController,
                     didChangeSection sectionInfo: NSFetchedResultsSectionInfo,
                                      atIndex sectionIndex: Int,
@@ -358,62 +378,80 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         }
     }
     
+    
+    // The second method may be called multiple times, once for each Color object that is added, deleted, or changed.
+    // We store the incex paths into the three arrays.
+
     func controller(controller: NSFetchedResultsController,
                     didChangeObject anObject: AnyObject,
                                     atIndexPath indexPath: NSIndexPath?,
                                                 forChangeType type: NSFetchedResultsChangeType,
                                                               newIndexPath: NSIndexPath?) {
-        
-        
-        
-        switch(type){
+
+        switch type {
             
         case .Insert:
-            photoAlbumVC?.insertItemsAtIndexPaths([newIndexPath!])
-            
+            print("Insert an item")
+            // Here we are noting that a new Color instance has been added to Core Data. We remember its index path
+            // so that we can add a cell in "controllerDidChangeContent". Note that the "newIndexPath" parameter has
+            // the index path that we want in this case
+            insertedIndexPaths.append(newIndexPath!)
+            break
         case .Delete:
-            photoAlbumVC?.deleteItemsAtIndexPaths([indexPath!])
-            
+            print("Delete an item")
+            // Here we are noting that a Color instance has been deleted from Core Data. We keep remember its index path
+            // so that we can remove the corresponding cell in "controllerDidChangeContent". The "indexPath" parameter has
+            // value that we want in this case.
+            deletedIndexPaths.append(indexPath!)
+            break
         case .Update:
-            photoAlbumVC?.reloadItemsAtIndexPaths([indexPath!])
-            
+            print("Update an item.")
+            // We don't expect Color instances to change after they are created. But Core Data would
+            // notify us of changes if any occured. This can be useful if you want to respond to changes
+            // that come about after data is downloaded. For example, when an images is downloaded from
+            // Flickr in the Virtual Tourist app
+            updatedIndexPaths.append(indexPath!)
+            break
         case .Move:
-            photoAlbumVC?.deleteItemsAtIndexPaths([indexPath!])
-            photoAlbumVC?.insertItemsAtIndexPaths([newIndexPath!])
+            print("Move an item. We don't expect to see this in this app.")
+            break
+            //default:
+            //break
         }
         
     }
-    */
+    
+    // This method is invoked after all of the changed in the current batch have been collected
+    // into the three index path arrays (insert, delete, and upate). We now need to loop through the
+    // arrays and perform the changes.
+    //
+    // The most interesting thing about the method is the collection view's "performBatchUpdates" method.
+    // Notice that all of the changes are performed inside a closure that is handed to the collection view.
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        
+        print("in controllerDidChangeContent. changes.count: \(insertedIndexPaths.count + deletedIndexPaths.count)")
+        
+        photoAlbumVC.performBatchUpdates({() -> Void in
+            
+            for indexPath in self.insertedIndexPaths {
+                self.photoAlbumVC.insertItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.deletedIndexPaths {
+                self.photoAlbumVC.deleteItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.updatedIndexPaths {
+                self.photoAlbumVC.reloadItemsAtIndexPaths([indexPath])
+            }
+            
+            }, completion: nil)
+    }
+
+    
 
     
 }
 
-/*
-extension PhotoAlbumViewController: UICollectionViewDelegateFlowLayout {
-    
-    //1
-    func collectionView(collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                               sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        
-        let flickrPhoto =  photoForIndexPath(indexPath)
-        //2
-        if var size = flickrPhoto.thumbnail?.size {
-            size.width += 10
-            size.height += 10
-            return size
-        }
-        return CGSize(width: 100, height: 100)
-    }
-    
-    //3
-    func collectionView(collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                               insetForSectionAtIndex section: Int) -> UIEdgeInsets {
-        return sectionInsets
-    }
-    
-}
-*/
 
 

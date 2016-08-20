@@ -11,6 +11,7 @@ import UIKit
 class PhotoCollectionViewCell: UICollectionViewCell {
     
     @IBOutlet var imageView: UIImageView!
+    @IBOutlet var activityIndicator: UIActivityIndicatorView!
     
     var taskToCancelifCellIsReused: NSURLSessionTask? {
         

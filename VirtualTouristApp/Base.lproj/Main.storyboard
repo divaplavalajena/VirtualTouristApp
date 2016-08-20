@@ -92,6 +92,10 @@
                                             <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="hQz-hN-XHd">
+                                                    <rect key="frame" x="32" y="31" width="37" height="37"/>
+                                                    <color key="color" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                </activityIndicatorView>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xx0-Hu-D4W">
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                 </imageView>
@@ -106,6 +110,7 @@
                                             <constraint firstItem="xx0-Hu-D4W" firstAttribute="top" secondItem="eWq-lE-aH0" secondAttribute="topMargin" constant="-8" id="vb9-Lg-T7f"/>
                                         </constraints>
                                         <connections>
+                                            <outlet property="activityIndicator" destination="hQz-hN-XHd" id="X0e-kO-iAD"/>
                                             <outlet property="imageView" destination="xx0-Hu-D4W" id="mg6-St-MfQ"/>
                                         </connections>
                                     </collectionViewCell>
