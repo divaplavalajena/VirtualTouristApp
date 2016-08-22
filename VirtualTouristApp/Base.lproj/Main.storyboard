@@ -92,10 +92,6 @@
                                             <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="hQz-hN-XHd">
-                                                    <rect key="frame" x="32" y="31" width="37" height="37"/>
-                                                    <color key="color" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                </activityIndicatorView>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xx0-Hu-D4W">
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                 </imageView>
@@ -110,7 +106,6 @@
                                             <constraint firstItem="xx0-Hu-D4W" firstAttribute="top" secondItem="eWq-lE-aH0" secondAttribute="topMargin" constant="-8" id="vb9-Lg-T7f"/>
                                         </constraints>
                                         <connections>
-                                            <outlet property="activityIndicator" destination="hQz-hN-XHd" id="X0e-kO-iAD"/>
                                             <outlet property="imageView" destination="xx0-Hu-D4W" id="mg6-St-MfQ"/>
                                         </connections>
                                     </collectionViewCell>
@@ -124,7 +119,7 @@
                                 <rect key="frame" x="0.0" y="556" width="600" height="44"/>
                                 <items>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="bH2-sY-0Wc"/>
-                                    <barButtonItem title="New Collection" id="HvV-Zy-rWL">
+                                    <barButtonItem title="Bottom Button" id="HvV-Zy-rWL">
                                         <connections>
                                             <action selector="newCollectionButton:" destination="lym-5n-VC7" id="2Wf-R6-cXE"/>
                                         </connections>
@@ -153,6 +148,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="CgS-vt-pa5"/>
                     <connections>
+                        <outlet property="bottomButton" destination="HvV-Zy-rWL" id="Jp7-Hp-KDZ"/>
                         <outlet property="mapView" destination="7K2-Uo-FXG" id="eWL-Kg-qc9"/>
                         <outlet property="photoAlbumVC" destination="uob-ap-AK5" id="Q83-Bc-wmw"/>
                     </connections>

@@ -50,7 +50,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     
     override func viewWillAppear(animated: Bool) {
         
-        // Use addMapLocations() method (change it first) to do this within an IF statement
+        // adds pins to map (if they are in Core Data)
+        // also called when navigating back from PhotoAlbumVC
+        // centers on location on map last loaded into the array via handleLongPress gesture recognizer
         addMapLocations()
     }
     
@@ -70,6 +72,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                 let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
                 stack.saveBothContexts()
                 print("Pin data was saved to the contexts after fetch resturned results == 0: \(pinInfo.coordinate.latitude)")
+                print("These are the results saved currently in Core Data (if results.count == 0): \(results)")
             }
             if (results.count > 0) {
                 for result in results {
@@ -77,14 +80,18 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                         print("Not saving becuase latitude already exists in Core Data context: \(pinInfo.coordinate.latitude)")
                         return
                     } else {
+                        // Create new Pin object in Core Data managedObjectContext
+                        _ = Pin(annotation: pinInfo, context: sharedContext)
                         // Save pin data to both contexts
                         let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
                         stack.saveBothContexts()
                         print("Pin data was saved to the contexts after fetch didn't find it in results: \(pinInfo.coordinate.latitude)")
+                        print("These are the results saved currently in Core Data (if results.count > 0): \(results)")
+                        return
                     }
                 }
             }
-            print("These are the results saved currently in Core Data: \(results)")
+            
         } catch let error as NSError {
             print("Fetch failed: \(error.localizedDescription)")
         }
