@@ -24,24 +24,42 @@
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="mnr-bW-sra"/>
                                 </connections>
                             </mapView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7pC-HP-kSe">
+                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="S4g-Mv-65o"/>
+                                </constraints>
+                                <items/>
+                                <color key="barTintColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            </toolbar>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap Pins to Delete" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zs1-QQ-94K">
+                                <rect key="frame" x="221" y="567" width="158" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="158" id="Zaj-hM-HrE"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="zs1-QQ-94K" firstAttribute="centerY" secondItem="7pC-HP-kSe" secondAttribute="centerY" id="Ote-8T-8jh"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="oCC-Xy-ZNA" secondAttribute="bottom" id="SRN-u2-Hft"/>
                             <constraint firstItem="oCC-Xy-ZNA" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-20" id="TGW-wm-mE3"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="7pC-HP-kSe" secondAttribute="bottom" id="WYj-Jh-wRe"/>
                             <constraint firstItem="oCC-Xy-ZNA" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="XJR-cL-oZM"/>
                             <constraint firstAttribute="trailingMargin" secondItem="oCC-Xy-ZNA" secondAttribute="trailing" constant="-20" id="gE5-of-af6"/>
+                            <constraint firstItem="zs1-QQ-94K" firstAttribute="centerX" secondItem="7pC-HP-kSe" secondAttribute="centerX" id="iFb-Hr-8kd"/>
+                            <constraint firstItem="7pC-HP-kSe" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-20" id="kDC-gv-oi6"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="7pC-HP-kSe" secondAttribute="trailing" constant="-20" id="s29-gO-3GT"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="qbY-KK-dVU">
-                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="895-Ye-tzL">
-                            <connections>
-                                <action selector="editButton:" destination="BYZ-38-t0r" id="bvV-Fz-3Xc"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" id="qbY-KK-dVU"/>
                     <connections>
+                        <outlet property="deleteLabel" destination="zs1-QQ-94K" id="afx-Ye-rfo"/>
                         <outlet property="mapView" destination="oCC-Xy-ZNA" id="Keq-Sf-ye8"/>
+                        <outlet property="toolbar" destination="7pC-HP-kSe" id="Wdg-rY-ofA"/>
                         <segue destination="lym-5n-VC7" kind="show" identifier="showPhotoAlbumVC" id="vpe-eO-o7B"/>
                     </connections>
                 </viewController>

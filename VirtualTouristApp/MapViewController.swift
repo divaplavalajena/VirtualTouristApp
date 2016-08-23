@@ -15,7 +15,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     //MARK: Properties
     var annotations = [MKPointAnnotation]()
     let locationManager = CLLocationManager()
-    var currentPin: Pin? = nil
+    var editMode = Bool()
     
     lazy var sharedContext: NSManagedObjectContext = {
         // Get the stack
@@ -24,15 +24,38 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         return stack.context
     }()
     
+    @IBOutlet var deleteLabel: UILabel!
+    @IBOutlet var toolbar: UIToolbar!
     @IBOutlet var mapView: MKMapView!
     
-    @IBAction func editButton(sender: AnyObject) {
-        //TODO: Create edit ability once Core Data is set up - will delete pins and connected photos from Core Data
+        
+    override func setEditing(editing: Bool, animated: Bool) {
+        super.setEditing(editing,animated:animated)
+        if (self.editing) {
+            //In Editing mode
+            self.editButtonItem().title = "Done"
+            toolbar.hidden = false
+            deleteLabel.hidden = false
+            editMode = true
+        }
+        else {
+            //Not in editing mode
+            self.editButtonItem().title = "Edit"
+            toolbar.hidden = true
+            deleteLabel.hidden = true
+            editMode = false
+            
+        }
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        editMode = false
+        deleteLabel.hidden = true
+        toolbar.hidden = true
+        navigationItem.rightBarButtonItem = editButtonItem()
         
         mapView.delegate = self
         
@@ -52,7 +75,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         
         // adds pins to map (if they are in Core Data)
         // also called when navigating back from PhotoAlbumVC
-        // centers on location on map last loaded into the array via handleLongPress gesture recognizer
+        // centers on location on map pin last loaded into the array via handleLongPress gesture recognizer
         addMapLocations()
     }
     
@@ -214,28 +237,62 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         let annotation = MKPointAnnotation()
         annotation.coordinate = (view.annotation?.coordinate)!
         
-        let request = NSFetchRequest(entityName: "Pin")
-        do {
-            let results = try sharedContext.executeFetchRequest(request) as! [Pin]
-            print(results)
-            if (results.count > 0) {
-                for result in results {
-                    if result.latitude == annotation.coordinate.latitude {
-                        // Segue to PhotoAlbumVC with pin info being passed to tappedPin
-                        print("The fetched latitude (from mapView didSelectAnnotationView) is \(result.latitude!) and the annotation latitude is \(annotation.coordinate.latitude)")
-                        performSegueWithIdentifier("showPhotoAlbumVC", sender: result)
+        if editMode == false {
+        
+            let request = NSFetchRequest(entityName: "Pin")
+            do {
+                let results = try sharedContext.executeFetchRequest(request) as! [Pin]
+                print(results)
+                if (results.count > 0) {
+                    for result in results {
+                        if result.latitude == annotation.coordinate.latitude {
+                            // Segue to PhotoAlbumVC with pin info being passed to tappedPin
+                            print("The fetched latitude (from mapView didSelectAnnotationView) is \(result.latitude!) and the annotation latitude is \(annotation.coordinate.latitude)")
+                            performSegueWithIdentifier("showPhotoAlbumVC", sender: result)
+                        }
                     }
+                } else {
+                    print("No Pin objects in Core Data on mapView select")
                 }
-            } else {
-                print("No Pin objects in Core Data on mapView select")
+            } catch let error as NSError {
+                print("Fetch failed: \(error.localizedDescription)")
             }
-        } catch let error as NSError {
-            print("Fetch failed: \(error.localizedDescription)")
+            self.mapView.deselectAnnotation(view.annotation, animated: true)
+            
+        } else {
+            //editMode == true so delete tapped pins
+            let request = NSFetchRequest(entityName: "Pin")
+            do {
+                let results = try sharedContext.executeFetchRequest(request) as! [Pin]
+                print(results)
+                if (results.count > 0) {
+                    for result in results {
+                        if result.latitude == annotation.coordinate.latitude {
+                            // remove pin from context and mapView, then save
+                            let pin = result
+                            sharedContext.deleteObject(pin)
+                            //self.mapView.removeAnnotation(annotation)
+                            annotations = annotations.filter() {$0 != annotation}
+                            
+                            // Save deleted pin data to both contexts
+                            let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
+                            stack.saveBothContexts()
+                            print("removing annotation and deleting from Core Data")
+                            
+                            self.mapView.removeAnnotations(mapView.annotations)
+                            //reload map locations now updated to remove selected pin
+                            addMapLocations()
+                            
+                        }
+                    }
+                } else {
+                    print("No Pin objects in Core Data on mapView select")
+                }
+            } catch let error as NSError {
+                print("Fetch failed: \(error.localizedDescription)")
+            }
+            self.mapView.deselectAnnotation(view.annotation, animated: true)
         }
-        
-        mapView.deselectAnnotation(view.annotation, animated: true)
-        
-        
     }
     
     // MARK: - Segues
