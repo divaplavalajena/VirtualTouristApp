@@ -16,11 +16,6 @@ class FlickrClient : NSObject {
     // shared session
     var session = NSURLSession.sharedSession()
     
-    //TODO: get these values from Core Data instead
-    //var latitude:Double?
-    //var longitude:Double?
-    //var annotationTitle: String?
-    
     private func bboxString(latitude: Double?, longitude: Double?) -> String {
         // ensure bbox is bounded by minimum and maximums
         if let latitude = latitude, let longitude = longitude {
@@ -85,8 +80,6 @@ class FlickrClient : NSObject {
                     //error if the parsing didn't provide good info to photosDictionary
                     completionHandlerForFlickrPages(randomPageNumber: nil, error: error)
                 }
-                
-                //self.displayImageFromFlickrBySearch(methodParameters, withPageNumber: randomPage)
             }
         }
     }

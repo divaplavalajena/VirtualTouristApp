@@ -117,23 +117,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                     return
                 }
 
-                /*
-                for result in results {
-                    if result.latitude == pinInfo.coordinate.latitude {
-                        print("Not saving becuase latitude already exists in Core Data context: \(pinInfo.coordinate.latitude)")
-                        return
-                    } else {
-                        // Create new Pin object in Core Data managedObjectContext
-                        _ = Pin(annotation: pinInfo, context: sharedContext)
-                        // Save pin data to both contexts
-                        let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
-                        stack.saveBothContexts()
-                        print("Pin data was saved to the contexts after fetch didn't find it in results: \(pinInfo.coordinate.latitude)")
-                        print("These are the results saved currently in Core Data (if results.count > 0): \(results)")
-                        return
-                    }
-                }
-                */
             }
             
         } catch let error as NSError {

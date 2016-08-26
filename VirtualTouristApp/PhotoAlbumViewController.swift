@@ -152,7 +152,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // return the number of items
         return fetchedResultsController.sections![section].numberOfObjects ?? 21
-        //fetchedResultsController.sections![section].numberOfObjects ?? 0
+        
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
@@ -307,7 +307,6 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     }()
     
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
-        //self.photoAlbumVC.reloadData()
         
         // We are about to handle some new changes. Start out with empty arrays for each change type
         insertedIndexPaths = [NSIndexPath]()
