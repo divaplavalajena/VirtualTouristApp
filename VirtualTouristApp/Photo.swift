@@ -26,7 +26,6 @@ class Photo: NSManagedObject {
         imageID = dictionary[FlickrClient.Constants.FlickrResponseKeys.ID] as? String
         imagePath = dictionary[FlickrClient.Constants.FlickrResponseKeys.MediumURL] as? String
         imageData = dictionary["imageData"] as? NSData
-        //TODO: add pinData to link to pin location?
     }
 
 }

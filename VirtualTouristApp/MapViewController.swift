@@ -57,17 +57,22 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         toolbar.hidden = true
         navigationItem.rightBarButtonItem = editButtonItem()
         
-        mapView.delegate = self
-        
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
+        let locationAuthStatus = CLLocationManager.authorizationStatus()
+        if locationAuthStatus == .NotDetermined {
+            locationManager.requestWhenInUseAuthorization()
+        }
+        //locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
+        
+        mapView.delegate = self
         mapView.showsUserLocation = true
         
         let uilpgr = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
         uilpgr.minimumPressDuration = 1.0
         mapView.addGestureRecognizer(uilpgr)
+
         
     }
     
@@ -98,6 +103,21 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                 print("These are the results saved currently in Core Data (if results.count == 0): \(results)")
             }
             if (results.count > 0) {
+                if results.contains ({ $0.latitude == annotation.coordinate.latitude}) {
+                    print("Not saving becuase latitude already exists in Core Data context: \(pinInfo.coordinate.latitude)")
+                    return
+                } else {
+                    // Create new Pin object in Core Data managedObjectContext
+                    _ = Pin(annotation: pinInfo, context: sharedContext)
+                    // Save pin data to both contexts
+                    let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
+                    stack.saveBothContexts()
+                    print("Pin data was saved to the contexts after fetch didn't find it in results: \(pinInfo.coordinate.latitude)")
+                    print("These are the results saved currently in Core Data (if results.count > 0): \(results)")
+                    return
+                }
+
+                /*
                 for result in results {
                     if result.latitude == pinInfo.coordinate.latitude {
                         print("Not saving becuase latitude already exists in Core Data context: \(pinInfo.coordinate.latitude)")
@@ -113,6 +133,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                         return
                     }
                 }
+                */
             }
             
         } catch let error as NSError {
@@ -122,10 +143,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     }
     
     // gesture recognizer to accept long press to place a pin on the map
-    func handleLongPress(getstureRecognizer : UIGestureRecognizer){
-        if getstureRecognizer.state != .Began { return }
+    func handleLongPress(gestureRecognizer : UIGestureRecognizer){
         
-        let touchPoint = getstureRecognizer.locationInView(self.mapView)
+        if gestureRecognizer.state != .Began { return }
+        
+        let touchPoint = gestureRecognizer.locationInView(self.mapView)
         let touchMapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
         
         let annotation = MKPointAnnotation()
@@ -134,9 +156,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         mapView.addAnnotation(annotation)
         print("The tapped pin (from handleLongPress) has a latitude of \(annotation.coordinate.latitude) and a longitude of \(annotation.coordinate.longitude) with a title of \(annotation.title)")
         
-        
         savePinInContexts(annotation)
+        
     }
+    
     
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
     {
@@ -171,6 +194,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     
     //Test data to see if map is working
     func addMapLocations() {
+        
+        annotations.removeAll()
         
         // Fetch request of managedObjectContext to get Pin instances from Core Data if they exist 
         // and add them to annotations array to populate map
@@ -208,8 +233,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
 
     
     // MARK: - MKMapViewDelegate
-    
-    
+
     // "Right callout accessory view" created to NOT show - tap will be detected on the pin itself
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         
@@ -239,50 +263,55 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         
         if editMode == false {
         
+            self.mapView.deselectAnnotation(view.annotation, animated: true)
+            
             let request = NSFetchRequest(entityName: "Pin")
             do {
                 let results = try sharedContext.executeFetchRequest(request) as! [Pin]
                 print(results)
                 if (results.count > 0) {
-                    for result in results {
-                        if result.latitude == annotation.coordinate.latitude {
-                            // Segue to PhotoAlbumVC with pin info being passed to tappedPin
-                            print("The fetched latitude (from mapView didSelectAnnotationView) is \(result.latitude!) and the annotation latitude is \(annotation.coordinate.latitude)")
-                            performSegueWithIdentifier("showPhotoAlbumVC", sender: result)
+                    if results.contains ({ $0.latitude == annotation.coordinate.latitude}) {
+                        for result in results {
+                            if result.latitude == annotation.coordinate.latitude {
+                                // Segue to PhotoAlbumVC with pin info being passed to tappedPin
+                                print("The fetched latitude (from mapView didSelectAnnotationView) is \(result.latitude!) and the annotation latitude is \(annotation.coordinate.latitude)")
+                                performSegueWithIdentifier("showPhotoAlbumVC", sender: result)
+                            }
                         }
                     }
+                    
                 } else {
                     print("No Pin objects in Core Data on mapView select")
                 }
             } catch let error as NSError {
                 print("Fetch failed: \(error.localizedDescription)")
             }
-            self.mapView.deselectAnnotation(view.annotation, animated: true)
+            
             
         } else {
+            self.mapView.deselectAnnotation(view.annotation, animated: true)
+            
             //editMode == true so delete tapped pins
             let request = NSFetchRequest(entityName: "Pin")
             do {
                 let results = try sharedContext.executeFetchRequest(request) as! [Pin]
                 print(results)
                 if (results.count > 0) {
-                    for result in results {
-                        if result.latitude == annotation.coordinate.latitude {
-                            // remove pin from context and mapView, then save
-                            let pin = result
-                            sharedContext.deleteObject(pin)
-                            //self.mapView.removeAnnotation(annotation)
-                            annotations = annotations.filter() {$0 != annotation}
-                            
-                            // Save deleted pin data to both contexts
-                            let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
-                            stack.saveBothContexts()
-                            print("removing annotation and deleting from Core Data")
-                            
-                            self.mapView.removeAnnotations(mapView.annotations)
-                            //reload map locations now updated to remove selected pin
-                            addMapLocations()
-                            
+                    self.mapView.removeAnnotation(view.annotation!)
+                    
+                    if results.contains ({ $0.latitude == annotation.coordinate.latitude}) {
+                        for result in results {
+                            if result.latitude == annotation.coordinate.latitude {
+                                // remove pin from context and mapView, then save
+                                let pin = result
+                                sharedContext.deleteObject(pin)
+                                
+                                // Save deleted pin data to both contexts
+                                let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
+                                stack.saveBothContexts()
+                                print("removing annotation and deleting from Core Data")
+                                
+                            }
                         }
                     }
                 } else {
@@ -291,7 +320,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             } catch let error as NSError {
                 print("Fetch failed: \(error.localizedDescription)")
             }
-            self.mapView.deselectAnnotation(view.annotation, animated: true)
+            
         }
     }
     
