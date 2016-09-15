@@ -290,9 +290,10 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     // MARK: NSFetchedResultsController Methods
     
-    lazy var fetchedResultsController: NSFetchedResultsController = { () -> <<error type>> in 
+    lazy var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult> = {
         
-        let fetchRequest = NSFetchRequest(entityName: "Photo")
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Photo.fetchRequest()
+        // NSFetchRequest<Photo>(entityName: "Photo")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "imageID", ascending: true)]
         fetchRequest.predicate = NSPredicate(format: "pinData == %@", self.tappedPin!)
         print("This is the fetchedResultsController being created with the tappedPin.latitude: \(self.tappedPin.latitude!)")
@@ -304,7 +305,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         
         return fetchedResultsController
         
-    }()
+    }
     
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         
