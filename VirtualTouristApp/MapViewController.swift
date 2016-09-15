@@ -19,7 +19,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     
     lazy var sharedContext: NSManagedObjectContext = {
         // Get the stack
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let delegate = UIApplication.shared.delegate as! AppDelegate
         let stack = delegate.stack
         return stack.context
     }()
@@ -29,20 +29,20 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     @IBOutlet var mapView: MKMapView!
     
         
-    override func setEditing(editing: Bool, animated: Bool) {
+    override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing,animated:animated)
-        if (self.editing) {
+        if (self.isEditing) {
             //In Editing mode
-            self.editButtonItem().title = "Done"
-            toolbar.hidden = false
-            deleteLabel.hidden = false
+            self.editButtonItem.title = "Done"
+            toolbar.isHidden = false
+            deleteLabel.isHidden = false
             editMode = true
         }
         else {
             //Not in editing mode
-            self.editButtonItem().title = "Edit"
-            toolbar.hidden = true
-            deleteLabel.hidden = true
+            self.editButtonItem.title = "Edit"
+            toolbar.isHidden = true
+            deleteLabel.isHidden = true
             editMode = false
             
         }
@@ -53,14 +53,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         // Do any additional setup after loading the view, typically from a nib.
         
         editMode = false
-        deleteLabel.hidden = true
-        toolbar.hidden = true
-        navigationItem.rightBarButtonItem = editButtonItem()
+        deleteLabel.isHidden = true
+        toolbar.isHidden = true
+        navigationItem.rightBarButtonItem = editButtonItem
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         let locationAuthStatus = CLLocationManager.authorizationStatus()
-        if locationAuthStatus == .NotDetermined {
+        if locationAuthStatus == .notDetermined {
             locationManager.requestWhenInUseAuthorization()
         }
         //locationManager.requestWhenInUseAuthorization()
@@ -76,7 +76,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         
         // adds pins to map (if they are in Core Data)
         // also called when navigating back from PhotoAlbumVC
@@ -84,33 +84,33 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         addMapLocations()
     }
     
-    func savePinInContexts(annotation: MKPointAnnotation) {
+    func savePinInContexts(_ annotation: MKPointAnnotation) {
         //func -create pins and access save in CoreDataStack.saveBothContexts so both main and persisting contexts are saved
         
         let pinInfo = annotation
         
         let request = NSFetchRequest(entityName: "Pin")
         do {
-            let results = try sharedContext.executeFetchRequest(request) as! [Pin]
+            let results = try sharedContext.fetch(request) as! [Pin]
             if (results.count == 0) {
                 print("No Pin objects in Core Data on savePinInContexts call.")
                 // Create new Pin object in Core Data managedObjectContext
                 _ = Pin(annotation: pinInfo, context: sharedContext)
                 // Save pin data to both contexts
-                let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
+                let stack = (UIApplication.shared.delegate as! AppDelegate).stack
                 stack.saveBothContexts()
                 print("Pin data was saved to the contexts after fetch resturned results == 0: \(pinInfo.coordinate.latitude)")
                 print("These are the results saved currently in Core Data (if results.count == 0): \(results)")
             }
             if (results.count > 0) {
-                if results.contains ({ $0.latitude == annotation.coordinate.latitude}) {
+                if results.contains (where: { $0.latitude == annotation.coordinate.latitude}) {
                     print("Not saving becuase latitude already exists in Core Data context: \(pinInfo.coordinate.latitude)")
                     return
                 } else {
                     // Create new Pin object in Core Data managedObjectContext
                     _ = Pin(annotation: pinInfo, context: sharedContext)
                     // Save pin data to both contexts
-                    let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
+                    let stack = (UIApplication.shared.delegate as! AppDelegate).stack
                     stack.saveBothContexts()
                     print("Pin data was saved to the contexts after fetch didn't find it in results: \(pinInfo.coordinate.latitude)")
                     print("These are the results saved currently in Core Data (if results.count > 0): \(results)")
@@ -126,12 +126,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     }
     
     // gesture recognizer to accept long press to place a pin on the map
-    func handleLongPress(gestureRecognizer : UIGestureRecognizer){
+    func handleLongPress(_ gestureRecognizer : UIGestureRecognizer){
         
-        if gestureRecognizer.state != .Began { return }
+        if gestureRecognizer.state != .began { return }
         
-        let touchPoint = gestureRecognizer.locationInView(self.mapView)
-        let touchMapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
+        let touchPoint = gestureRecognizer.location(in: self.mapView)
+        let touchMapCoordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
         
         let annotation = MKPointAnnotation()
         annotation.coordinate = touchMapCoordinate
@@ -144,7 +144,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     }
     
     
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
     {
         let location = locations.last
         let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
@@ -162,13 +162,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         savePinInContexts(annotation)
     }
     
-    func locationManager(manager: CLLocationManager, didFailWithError error: NSError)
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error)
     {
         print("Errors: " + error.localizedDescription)
     }
     
     //Centers the map on a coordinate (with lat and lon) with requisite radius
-    func centerMapOnLocation(location: MKPointAnnotation, regionRadius: Double) {
+    func centerMapOnLocation(_ location: MKPointAnnotation, regionRadius: Double) {
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(location.coordinate,
                                                                   regionRadius * 2.0, regionRadius * 2.0)
         mapView.setRegion(coordinateRegion, animated: true)
@@ -184,7 +184,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         // and add them to annotations array to populate map
         let request = NSFetchRequest(entityName: "Pin")
         do {
-            let results = try sharedContext.executeFetchRequest(request) as! [Pin]
+            let results = try sharedContext.fetch(request) as! [Pin]
             if (results.count > 0) {
                 print("Pin objects count: \(results.count) found in Core Data listed here:")
                 for result in results {
@@ -218,16 +218,16 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     // MARK: - MKMapViewDelegate
 
     // "Right callout accessory view" created to NOT show - tap will be detected on the pin itself
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
         let reuseId = "pin"
         
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
         
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = false
-            pinView!.pinTintColor = UIColor.redColor()
+            pinView!.pinTintColor = UIColor.red
         }
         else {
             pinView!.annotation = annotation
@@ -239,7 +239,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     
     // This method allows for a direct pin tap as opposed to a "right callout accessory view"
     // The segue to the PhotoAlbumVC is performed from the direct pin tap
-    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
         let annotation = MKPointAnnotation()
         annotation.coordinate = (view.annotation?.coordinate)!
@@ -250,15 +250,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             
             let request = NSFetchRequest(entityName: "Pin")
             do {
-                let results = try sharedContext.executeFetchRequest(request) as! [Pin]
+                let results = try sharedContext.fetch(request) as! [Pin]
                 print(results)
                 if (results.count > 0) {
-                    if results.contains ({ $0.latitude == annotation.coordinate.latitude}) {
+                    if results.contains (where: { $0.latitude == annotation.coordinate.latitude}) {
                         for result in results {
                             if result.latitude == annotation.coordinate.latitude {
                                 // Segue to PhotoAlbumVC with pin info being passed to tappedPin
                                 print("The fetched latitude (from mapView didSelectAnnotationView) is \(result.latitude!) and the annotation latitude is \(annotation.coordinate.latitude)")
-                                performSegueWithIdentifier("showPhotoAlbumVC", sender: result)
+                                performSegue(withIdentifier: "showPhotoAlbumVC", sender: result)
                             }
                         }
                     }
@@ -277,20 +277,20 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             //editMode == true so delete tapped pins
             let request = NSFetchRequest(entityName: "Pin")
             do {
-                let results = try sharedContext.executeFetchRequest(request) as! [Pin]
+                let results = try sharedContext.fetch(request) as! [Pin]
                 print(results)
                 if (results.count > 0) {
                     self.mapView.removeAnnotation(view.annotation!)
                     
-                    if results.contains ({ $0.latitude == annotation.coordinate.latitude}) {
+                    if results.contains (where: { $0.latitude == annotation.coordinate.latitude}) {
                         for result in results {
                             if result.latitude == annotation.coordinate.latitude {
                                 // remove pin from context and mapView, then save
                                 let pin = result
-                                sharedContext.deleteObject(pin)
+                                sharedContext.delete(pin)
                                 
                                 // Save deleted pin data to both contexts
-                                let stack = (UIApplication.sharedApplication().delegate as! AppDelegate).stack
+                                let stack = (UIApplication.shared.delegate as! AppDelegate).stack
                                 stack.saveBothContexts()
                                 print("removing annotation and deleting from Core Data")
                                 
@@ -309,9 +309,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     
     // MARK: - Segues
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showPhotoAlbumVC" {
-            let photoCollectionVC: PhotoAlbumViewController = segue.destinationViewController as! PhotoAlbumViewController
+            let photoCollectionVC: PhotoAlbumViewController = segue.destination as! PhotoAlbumViewController
             photoCollectionVC.tappedPin = sender as? Pin
         }
     }

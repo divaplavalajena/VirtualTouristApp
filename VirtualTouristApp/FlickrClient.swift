@@ -14,9 +14,9 @@ class FlickrClient : NSObject {
     
     // MARK: Properties
     // shared session
-    var session = NSURLSession.sharedSession()
+    var session = URLSession.shared
     
-    private func bboxString(latitude: Double?, longitude: Double?) -> String {
+    fileprivate func bboxString(_ latitude: Double?, longitude: Double?) -> String {
         // ensure bbox is bounded by minimum and maximums
         if let latitude = latitude, let longitude = longitude {
             let minimumLon = max(longitude - Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.0)
@@ -33,69 +33,69 @@ class FlickrClient : NSObject {
     // MARK: Flickr API
     
     //Get a random page number of pages searched on Flickr
-    func getPagesFromFlickrBySearch(latitude: Double?, longitude: Double?, completionHandlerForFlickrPages: (randomPageNumber: Int?, error: NSError?) -> Void) {
+    func getPagesFromFlickrBySearch(_ latitude: Double?, longitude: Double?, completionHandlerForFlickrPages: @escaping (_ randomPageNumber: Int?, _ error: NSError?) -> Void) {
         
         /* 1. Specify parameters, method (if has {key}), and HTTP body (if POST) */
         let methodParameters: [String : AnyObject] = [
-            Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod,
-            Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey,
-            Constants.FlickrParameterKeys.BoundingBox: bboxString(latitude, longitude: longitude),
-            Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch,
-            Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL,
-            Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat,
-            Constants.FlickrParameterKeys.NoJSONCallback: Constants.FlickrParameterValues.DisableJSONCallback
+            Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod as AnyObject,
+            Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey as AnyObject,
+            Constants.FlickrParameterKeys.BoundingBox: bboxString(latitude, longitude: longitude) as AnyObject,
+            Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch as AnyObject,
+            Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL as AnyObject,
+            Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat as AnyObject,
+            Constants.FlickrParameterKeys.NoJSONCallback: Constants.FlickrParameterValues.DisableJSONCallback as AnyObject
         ]
         
         /* 2. Make the request */
         taskForGETMethod(methodParameters) { (result, error) in
             
             /* 3. Send the desired value(s) to completion handler or print to console */
-            func displayError(error: String) {
+            func displayError(_ error: String) {
                 print(error)
             }
             if let error = error {
-                completionHandlerForFlickrPages(randomPageNumber: nil, error: error)
+                completionHandlerForFlickrPages(nil, error)
             } else {
             
                 /* GUARD: Did Flickr return an error (stat != ok)? */
-                guard let stat = result[Constants.FlickrResponseKeys.Status] as? String where stat == Constants.FlickrResponseValues.OKStatus else {
+                guard let stat = result?[Constants.FlickrResponseKeys.Status] as? String , stat == Constants.FlickrResponseValues.OKStatus else {
                     displayError("Flickr API returned an error. See error code and message in \(result)")
                     return
                 }
                 
                 /* GUARD: Is "photos" key in our result? */
-                if let photosDictionary = result[Constants.FlickrResponseKeys.Photos] as? [String:AnyObject] {
+                if let photosDictionary = result?[Constants.FlickrResponseKeys.Photos] as? [String:AnyObject] {
                     /* GUARD: Is "pages" key in the photosDictionary? */
                     if let totalPages = photosDictionary[Constants.FlickrResponseKeys.Pages] as? Int {
                         // pick a random page!
                         let pageLimit = min(totalPages, 40)
                         let randomPage = Int(arc4random_uniform(UInt32(pageLimit))) + 1
-                        completionHandlerForFlickrPages(randomPageNumber: randomPage, error: nil)
+                        completionHandlerForFlickrPages(randomPage, nil)
                         
                     } else {
-                        completionHandlerForFlickrPages(randomPageNumber: nil, error: error)
+                        completionHandlerForFlickrPages(nil, error)
                     }
                     
                 } else {
                     //error if the parsing didn't provide good info to photosDictionary
-                    completionHandlerForFlickrPages(randomPageNumber: nil, error: error)
+                    completionHandlerForFlickrPages(nil, error)
                 }
             }
         }
     }
     
     //Get images from Flickr to display in collection view
-    func displayImagesFromFlickrBySearch(latitude: Double?, longitude: Double?, withPageNumber: Int, completionHandlerForFlickrImages: (photos: [[String: AnyObject]]?, error: NSError?) -> Void) {
+    func displayImagesFromFlickrBySearch(_ latitude: Double?, longitude: Double?, withPageNumber: Int, completionHandlerForFlickrImages: @escaping (_ photos: [[String: AnyObject]]?, _ error: NSError?) -> Void) {
         
         /* 1. Specify parameters, method (if has {key}), and HTTP body (if POST) */
         let methodParameters: [String : AnyObject] = [
-            Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod,
-            Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey,
-            Constants.FlickrParameterKeys.BoundingBox: bboxString(latitude, longitude: longitude),
-            Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch,
-            Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL,
-            Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat,
-            Constants.FlickrParameterKeys.NoJSONCallback: Constants.FlickrParameterValues.DisableJSONCallback,
+            Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod as AnyObject,
+            Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey as AnyObject,
+            Constants.FlickrParameterKeys.BoundingBox: bboxString(latitude, longitude: longitude) as AnyObject,
+            Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch as AnyObject,
+            Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL as AnyObject,
+            Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat as AnyObject,
+            Constants.FlickrParameterKeys.NoJSONCallback: Constants.FlickrParameterValues.DisableJSONCallback as AnyObject,
             Constants.FlickrParameterKeys.Page: withPageNumber,
             Constants.FlickrParameterKeys.PerPage: Constants.FlickrParameterValues.UsePerPage
         ]
@@ -104,21 +104,21 @@ class FlickrClient : NSObject {
         taskForGETMethod(methodParameters) { (result, error) in
             
             /* 3. Send the desired value(s) to completion handler or print to console */
-            func displayError(error: String) {
+            func displayError(_ error: String) {
                 print(error)
             }
             if let error = error {
-                completionHandlerForFlickrImages(photos: nil, error: error)
+                completionHandlerForFlickrImages(nil, error)
             } else {
             
                 /* GUARD: Did Flickr return an error (stat != ok)? */
-                guard let stat = result[Constants.FlickrResponseKeys.Status] as? String where stat == Constants.FlickrResponseValues.OKStatus else {
+                guard let stat = result?[Constants.FlickrResponseKeys.Status] as? String , stat == Constants.FlickrResponseValues.OKStatus else {
                     displayError("Flickr API returned an error. See error code and message in \(result)")
                     return
                 }
                 
                 /* Is the "photos" key in our result? */
-                if let photosDictionary = result[Constants.FlickrResponseKeys.Photos] as? [String:AnyObject] {
+                if let photosDictionary = result?[Constants.FlickrResponseKeys.Photos] as? [String:AnyObject] {
                     /* Is the "photo" key in photosDictionary? */
                     if let photosArray = photosDictionary[Constants.FlickrResponseKeys.Photo] as? [[String: AnyObject]] {
                         if photosArray.count == 0 {
@@ -126,17 +126,17 @@ class FlickrClient : NSObject {
                             return
                         } else {
                             //completion handler passes photosArray to ViewController calling for further processing...
-                            completionHandlerForFlickrImages(photos: photosArray, error: nil)
+                            completionHandlerForFlickrImages(photosArray, nil)
                         }
                         
                     } else {
                         //error if the parsing from the photosDictionary down to the photosArray did not work
-                        completionHandlerForFlickrImages(photos: nil, error: error)
+                        completionHandlerForFlickrImages(nil, error)
                     }
                     
                 } else {
                     //error if the parsing didn't provide good info to photosDictionary
-                    completionHandlerForFlickrImages(photos: nil, error: error)
+                    completionHandlerForFlickrImages(nil, error)
                 }
                 
             }
@@ -144,19 +144,19 @@ class FlickrClient : NSObject {
         
     }
     
-    func taskForGETMethod(parameters: [String:AnyObject], completionHandlerForGET: (result: AnyObject!, error: NSError?) -> Void) -> NSURLSessionDataTask {
+    func taskForGETMethod(_ parameters: [String:AnyObject], completionHandlerForGET: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
         
         /* 1. Set the parameters */
         var parameters = parameters
 
         
         /* 2/3. Build the URL, Configure the request */
-        let request = NSMutableURLRequest(URL: flickrURLFromParameters(parameters))
+        let request = NSMutableURLRequest(url: flickrURLFromParameters(parameters))
         
         /* 4. Make the request */
-        let task = session.dataTaskWithRequest(request) { (data, response, error) in
+        let task = session.dataTask(with: request, completionHandler: { (data, response, error) in
             
-            func sendError(error: String) {
+            func sendError(_ error: String) {
                 print(error)
                 let userInfo = [NSLocalizedDescriptionKey : error]
                 completionHandlerForGET(result: nil, error: NSError(domain: "taskForGETMethod", code: 1, userInfo: userInfo))
@@ -169,7 +169,7 @@ class FlickrClient : NSObject {
             }
             
             /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode , statusCode >= 200 && statusCode <= 299 else {
                 sendError("Your request returned a status code other than 2xx!")
                 return
             }
@@ -182,7 +182,7 @@ class FlickrClient : NSObject {
             
             /* 5/6. Parse the data and use the data (happens in completion handler) */
             self.convertDataWithCompletionHandler(data, completionHandlerForConvertData: completionHandlerForGET)
-        }
+        }) 
         
         /* 7. Start the request */
         task.resume()
@@ -193,54 +193,54 @@ class FlickrClient : NSObject {
     
     
     // MARK: Helper for Creating a URL from Parameters
-    private func flickrURLFromParameters(parameters: [String:AnyObject]) -> NSURL {
+    fileprivate func flickrURLFromParameters(_ parameters: [String:AnyObject]) -> URL {
         
-        let components = NSURLComponents()
+        var components = URLComponents()
         components.scheme = Constants.Flickr.APIScheme
         components.host = Constants.Flickr.APIHost
         components.path = Constants.Flickr.APIPath
-        components.queryItems = [NSURLQueryItem]()
+        components.queryItems = [URLQueryItem]()
         
         for (key, value) in parameters {
-            let queryItem = NSURLQueryItem(name: key, value: "\(value)")
+            let queryItem = URLQueryItem(name: key, value: "\(value)")
             components.queryItems!.append(queryItem)
         }
         
-        return components.URL!
+        return components.url!
     }
     
     // given raw JSON, return a usable Foundation object
-    private func convertDataWithCompletionHandler(data: NSData, completionHandlerForConvertData: (result: AnyObject!, error: NSError?) -> Void) {
+    fileprivate func convertDataWithCompletionHandler(_ data: Data, completionHandlerForConvertData: (_ result: AnyObject?, _ error: NSError?) -> Void) {
         
         var parsedResult: AnyObject!
         do {
-            parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+            parsedResult = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
         } catch {
             let userInfo = [NSLocalizedDescriptionKey : "Could not parse the data as JSON: '\(data)'"]
-            completionHandlerForConvertData(result: nil, error: NSError(domain: "convertDataWithCompletionHandler", code: 1, userInfo: userInfo))
+            completionHandlerForConvertData(nil, NSError(domain: "convertDataWithCompletionHandler", code: 1, userInfo: userInfo))
         }
         
-        completionHandlerForConvertData(result: parsedResult, error: nil)
+        completionHandlerForConvertData(parsedResult, nil)
     }
 
 
-    func getFlickrImage(size: String, filePath: String, completionHandlerForImage: (imageData: NSData?, error: NSError?) -> Void) -> NSURLSessionTask {
+    func getFlickrImage(_ size: String, filePath: String, completionHandlerForImage: @escaping (_ imageData: Data?, _ error: NSError?) -> Void) -> URLSessionTask {
         
         /* 1. Set the parameters */
         // There are none...
         
         /* 2/3. Build the URL and configure the request */
-        let baseURL = NSURL(string: filePath)!
-        let url = baseURL.URLByAppendingPathComponent(size)
-        let request = NSURLRequest(URL: url)
+        let baseURL = URL(string: filePath)!
+        let url = baseURL.appendingPathComponent(size)
+        let request = URLRequest(url: url)
         
         /* 4. Make the request */
-        let task = session.dataTaskWithRequest(request) { (data, response, error) in
+        let task = session.dataTask(with: request, completionHandler: { (data, response, error) in
             
-            func sendError(error: String) {
+            func sendError(_ error: String) {
                 print(error)
                 let userInfo = [NSLocalizedDescriptionKey : error]
-                completionHandlerForImage(imageData: nil, error: NSError(domain: "taskForGETMethod", code: 1, userInfo: userInfo))
+                completionHandlerForImage(nil, NSError(domain: "taskForGETMethod", code: 1, userInfo: userInfo))
             }
             
             /* GUARD: Was there an error? */
@@ -250,7 +250,7 @@ class FlickrClient : NSObject {
             }
             
             /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode , statusCode >= 200 && statusCode <= 299 else {
                 sendError("Your request returned a status code other than 2xx!")
                 return
             }
@@ -262,8 +262,8 @@ class FlickrClient : NSObject {
             }
             
             /* 5/6. Parse the data and use the data (happens in completion handler) */
-            completionHandlerForImage(imageData: data, error: nil)
-        }
+            completionHandlerForImage(data, nil)
+        }) 
         
         /* 7. Start the request */
         task.resume()
