@@ -89,7 +89,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         
         let pinInfo = annotation
         
-        let request = NSFetchRequest(entityName: "Pin")
+        let request: NSFetchRequest<NSFetchRequestResult> = Pin.fetchRequest()
         do {
             let results = try sharedContext.fetch(request) as! [Pin]
             if (results.count == 0) {
@@ -103,7 +103,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                 print("These are the results saved currently in Core Data (if results.count == 0): \(results)")
             }
             if (results.count > 0) {
-                if results.contains (where: { $0.latitude == annotation.coordinate.latitude}) {
+                if results.contains( where: { Double($0.latitude!) == annotation.coordinate.latitude}) {
                     print("Not saving becuase latitude already exists in Core Data context: \(pinInfo.coordinate.latitude)")
                     return
                 } else {
@@ -116,9 +116,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                     print("These are the results saved currently in Core Data (if results.count > 0): \(results)")
                     return
                 }
-
             }
-            
         } catch let error as NSError {
             print("Fetch failed: \(error.localizedDescription)")
         }
@@ -182,7 +180,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         
         // Fetch request of managedObjectContext to get Pin instances from Core Data if they exist 
         // and add them to annotations array to populate map
-        let request = NSFetchRequest(entityName: "Pin")
+        let request: NSFetchRequest<NSFetchRequestResult> = Pin.fetchRequest()
         do {
             let results = try sharedContext.fetch(request) as! [Pin]
             if (results.count > 0) {
@@ -248,14 +246,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         
             self.mapView.deselectAnnotation(view.annotation, animated: true)
             
-            let request = NSFetchRequest(entityName: "Pin")
+            let request: NSFetchRequest<NSFetchRequestResult> = Pin.fetchRequest()
             do {
                 let results = try sharedContext.fetch(request) as! [Pin]
                 print(results)
                 if (results.count > 0) {
-                    if results.contains (where: { $0.latitude == annotation.coordinate.latitude}) {
+                    if results.contains(where: { Double($0.latitude!) == annotation.coordinate.latitude}) {
                         for result in results {
-                            if result.latitude == annotation.coordinate.latitude {
+                            if Double(result.latitude!) == annotation.coordinate.latitude {
                                 // Segue to PhotoAlbumVC with pin info being passed to tappedPin
                                 print("The fetched latitude (from mapView didSelectAnnotationView) is \(result.latitude!) and the annotation latitude is \(annotation.coordinate.latitude)")
                                 performSegue(withIdentifier: "showPhotoAlbumVC", sender: result)
@@ -275,16 +273,16 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             self.mapView.deselectAnnotation(view.annotation, animated: true)
             
             //editMode == true so delete tapped pins
-            let request = NSFetchRequest(entityName: "Pin")
+            let request: NSFetchRequest<NSFetchRequestResult> = Pin.fetchRequest()
             do {
                 let results = try sharedContext.fetch(request) as! [Pin]
                 print(results)
                 if (results.count > 0) {
                     self.mapView.removeAnnotation(view.annotation!)
                     
-                    if results.contains (where: { $0.latitude == annotation.coordinate.latitude}) {
+                    if results.contains(where: { Double($0.latitude!) == annotation.coordinate.latitude}) {
                         for result in results {
-                            if result.latitude == annotation.coordinate.latitude {
+                            if Double(result.latitude!) == annotation.coordinate.latitude {
                                 // remove pin from context and mapView, then save
                                 let pin = result
                                 sharedContext.delete(pin)

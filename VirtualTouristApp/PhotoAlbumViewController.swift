@@ -151,7 +151,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // return the number of items
-        return fetchedResultsController.sections![section].numberOfObjects ?? 21
+        return fetchedResultsController.sections![section].numberOfObjects 
         
     }
     
@@ -293,7 +293,6 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
     lazy var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult> = {
         
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Photo.fetchRequest()
-        // NSFetchRequest<Photo>(entityName: "Photo")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "imageID", ascending: true)]
         fetchRequest.predicate = NSPredicate(format: "pinData == %@", self.tappedPin!)
         print("This is the fetchedResultsController being created with the tappedPin.latitude: \(self.tappedPin.latitude!)")
@@ -305,7 +304,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDelegate, UICo
         
         return fetchedResultsController
         
-    }
+    }()
     
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         

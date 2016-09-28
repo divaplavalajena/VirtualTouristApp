@@ -13,6 +13,10 @@ import Foundation
 import CoreData
 
 extension Photo {
+    
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Photo> {
+        return NSFetchRequest<Photo>(entityName: "Photo");
+    }
 
     @NSManaged var imageID: String?
     @NSManaged var imagePath: String?

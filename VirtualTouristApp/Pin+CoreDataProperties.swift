@@ -13,6 +13,10 @@ import Foundation
 import CoreData
 
 extension Pin {
+    
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Pin> {
+        return NSFetchRequest<Pin>(entityName: "Pin");
+    }
 
     @NSManaged var annotationTitle: String?
     @NSManaged var latitude: NSNumber?
