@@ -47,7 +47,7 @@ class FlickrClient : NSObject {
         ]
         
         /* 2. Make the request */
-        taskForGETMethod(methodParameters) { (result, error) in
+        let _ = taskForGETMethod(methodParameters) { (result, error) in
             
             /* 3. Send the desired value(s) to completion handler or print to console */
             func displayError(_ error: String) {
@@ -101,7 +101,7 @@ class FlickrClient : NSObject {
         ]
         
         /* 2. Make the request */
-        taskForGETMethod(methodParameters) { (result, error) in
+        let _ = taskForGETMethod(methodParameters) { (result, error) in
             
             /* 3. Send the desired value(s) to completion handler or print to console */
             func displayError(_ error: String) {
